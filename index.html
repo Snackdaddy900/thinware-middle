@@ -1,169 +1,30 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Thinware Lead Form</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        max-width: 480px;
-        margin: 2rem auto;
-        padding: 1rem;
-        line-height: 1.5;
-      }
+<h1>Lead Form</h1>
 
-      h1 {
-        font-size: 1.6rem;
-        margin-bottom: 1rem;
-      }
+<form id="form">
+  <input name="leadName" placeholder="Name" required />
+  <input name="companyName" placeholder="Company" />
+  <input name="leadEmail" placeholder="Email" type="email" required />
+  <button>Send</button>
+</form>
 
-      label {
-        display: block;
-        margin: 0.75rem 0 0.25rem;
-        font-weight: 600;
-      }
+<script>
+document.getElementById("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
 
-      input,
-      textarea,
-      button {
-        width: 100%;
-        box-sizing: border-box;
-        font-size: 1rem;
-        padding: 0.5rem 0.6rem;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-      }
+  data.notes = "";
+  data.product = "Test";
+  data.config = "Demo";
+  data.price = null;
+  data.configId = "demo";
+  data.sourceUrl = location.href;
 
-      button {
-        margin-top: 1rem;
-        cursor: pointer;
-        border: none;
-        background: #111827;
-        color: #fff;
-        font-weight: 600;
-      }
+  await fetch("/.netlify/functions/send-quote-lead", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(data)
+  });
 
-      button:disabled {
-        opacity: 0.6;
-        cursor: default;
-      }
-
-      .status {
-        margin-top: 1rem;
-        min-height: 1.2rem;
-        font-size: 0.95rem;
-      }
-
-      .status.success {
-        color: #047857;
-      }
-
-      .status.error {
-        color: #b91c1c;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Thinware Lead</h1>
-
-    <form id="lead-form">
-      <label for="leadName">Name</label>
-      <input
-        id="leadName"
-        name="leadName"
-        type="text"
-        autocomplete="name"
-        required
-      />
-
-      <label for="companyName">Company</label>
-      <input
-        id="companyName"
-        name="companyName"
-        type="text"
-        autocomplete="organization"
-      />
-
-      <label for="leadEmail">Email</label>
-      <input
-        id="leadEmail"
-        name="leadEmail"
-        type="email"
-        autocomplete="email"
-        required
-      />
-
-      <button type="submit">Send quote request</button>
-      <div id="status" class="status"></div>
-    </form>
-
-    <script>
-      const form = document.getElementById("lead-form");
-      const statusEl = document.getElementById("status");
-
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        statusEl.textContent = "";
-        statusEl.className = "status";
-
-        const button = form.querySelector("button[type=submit]");
-        button.disabled = true;
-
-        const leadName = form.leadName.value.trim();
-        const companyName = form.companyName.value.trim();
-        const leadEmail = form.leadEmail.value.trim();
-
-        // Build the payload expected by send-quote-lead
-        const payload = {
-          leadName,
-          leadEmail,
-          companyName,
-          // Safe defaults for fields your function likely expects:
-          notes: "",
-          product: "Thinware test product",
-          config: "Demo config",
-          price: null,
-          configId: "demo-config",
-          sourceUrl: window.location.href,
-        };
-
-        try {
-          const res = await fetch("/.netlify/functions/send-quote-lead", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-          });
-
-          let data;
-          try {
-            data = await res.json();
-          } catch (_) {
-            data = null;
-          }
-
-          if (!res.ok || (data && data.ok === false)) {
-            const msg =
-              (data && (data.error || data.message)) ||
-              `Request failed with status ${res.status}`;
-            statusEl.textContent = `Error: ${msg}`;
-            statusEl.className = "status error";
-          } else {
-            statusEl.textContent = "Quote request sent ✅";
-            statusEl.className = "status success";
-            form.reset();
-          }
-        } catch (err) {
-          statusEl.textContent = "Network error sending request";
-          statusEl.className = "status error";
-          console.error(err);
-        } finally {
-          button.disabled = false;
-        }
-      });
-    </script>
-  </body>
-</html>
+  alert("Sent");
+});
+</script>

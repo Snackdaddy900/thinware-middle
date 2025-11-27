@@ -1,4 +1,14 @@
 [build]
-  publish = "."
-  functions = "netlify/functions"
+  command = ""
+  publish = "public"
+
+[dev]
+  command = ""
+  publish = "public"
+  targetPort = 0
+
+[functions]
+  directory = "functions"
+  node_bundler = "esbuild"
+
 

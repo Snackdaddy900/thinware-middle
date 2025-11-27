@@ -1,0 +1,22 @@
+exports.handler = async (event) => {
+  let payload = {};
+
+  try {
+    payload = JSON.parse(event.body || "{}");
+  } catch (err) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ ok: false, error: "Invalid JSON" }),
+    };
+  }
+
+  return {
+    statusCode: 200,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ok: true,
+      received: payload,
+      timestamp: Date.now(),
+    }),
+  };
+};

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quote Request Form</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 1rem;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 2rem;
+      }
+      main {
+        grid-column: 1 / 2;
+      }
+      aside {
+        grid-column: 2 / 3;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+      }
+      button {
+        padding: 0.7rem 1.4rem;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 1rem;
+        white-space: pre-wrap;
+        margin-top: 0.5rem;
+      }
+      code {
+        background: #eee;
+        padding: 0 0.2rem;
+      }
+      .card {
+        border: 1px solid #ddd;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      iframe {
+        width: 100%;
+        height: 320px;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Request a Quote</h1>
+
+      <p>
+        This form builds a JSON payload from the inputs
+        <strong>plus any URL parameters or Vectary messages</strong> and sends
+        it to <code>/.netlify/functions/send-quote-lead</code>.
+      </p>
+
+      <form id="quoteForm">
+        <label>Lead Name</label>
+        <input type="text" id="leadName" placeholder="Your name" required />
+
+        <label>Email</label>
+        <input
+          type="email"
+          id="leadEmail"
+          placeholder="you@example.com"
+          required
+        />
+
+        <label>Company Name (optional)</label>
+        <input type="text" id="companyName" placeholder="Working Logic Ltd" />
+
+        <label>Product</label>
+        <select id="product" required>
+          <option value="">-- choose product --</option>
+          <option value="DeskPowerRail">DeskPowerRail</option>
+          <option value="QuickLink Module">QuickLink Module</option>
+          <option value="SparkWall">SparkWall</option>
+        </select>
+
+        <label>Price</label>
+        <input type="number" id="price" placeholder="399" required />
+
+        <label>Notes</label>
+        <textarea id="notes" placeholder="Add any details..."></textarea>
+
+        <label>Config ID</label>
+        <input type="text" id="configId" placeholder="QKLINK-1200-BLK-3M" />
+
+        <button type="submit">Send Quote Request</button>
+      </form>
+
+      <div class="card">
+        <h2>Server Response</h2>
+        <pre id="output">No request yet.</pre>
+      </div>
+    </main>
+
+    <aside>
+      <div class="card">
+        <h2>Configurator (Vectary placeholder)</h2>
+        <p style="font-size: 0.9rem;">
+          Replace the <code>src</code> below with your Vectary embed URL. The
+          scene can send config via <code>postMessage</code> to this page.
+        </p>
+        <iframe
+          id="vectaryFrame"
+          src="about:blank"
+          title="Vectary Configurator"
+        ></iframe>
+      </div>
+
+      <div class="card">
+        <h2>Latest Config</h2>
+        <p style="font-size: 0.9rem;">
+          Source:
+          <strong><span id="configSource">url</span></strong>
+          (<code>url</code> = URL parameters, <code>vectary</code> =
+          postMessage)
+        </p>
+        <pre id="configDebug">{}</pre>
+      </div>
+    </aside>
+
+    <script>
+      // --- Helper: parse URL query parameters into an object ---
+      function getQueryParams() {
+        const params = {};
+        const searchParams = new URLSearchParams(window.location.search);
+        for (const [key, value] of searchParams.entries()) {
+          params[key] = value;
+        }
+        return params;
+      }
+
+      const query = getQueryParams();
+
+      // --- Build initial config from URL params ---
+      const configFromUrl = {
+        variant: query.variant || query.v || "unknown",
+        color: query.color || query.col || "unknown",
+        length_mm: query.length_mm
+          ? Number(query.length_mm)
+          : query.len
+          ? Number(query.len)
+          : 0,
+        raw: query
+      };
+
+      let latestConfig = configFromUrl;
+      let latestConfigSource = "url";
+
+      const configSourceEl = document.getElementById("configSource");
+      const configDebugEl = document.getElementById("configDebug");
+
+      function updateConfigDebug() {
+        configSourceEl.textContent = latestConfigSource;
+        configDebugEl.textContent = JSON.stringify(latestConfig, null, 2);
+      }
+
+      // --- Prefill form fields from URL params where it makes sense ---
+
+      // product (?product=DeskPowerRail)
+      if (query.product) {
+        const productSelect = document.getElementById("product");
+        const option = Array.from(productSelect.options).find(
+          (opt) => opt.value === query.product
+        );
+        if (option) productSelect.value = query.product;
+      }
+
+      // price (?price=399 or ?p=399)
+      if (query.price || query.p) {
+        document.getElementById("price").value = query.price || query.p;
+      }
+
+      // configId (?configId=... or ?cid=...)
+      if (query.configId || query.cid) {
+        document.getElementById("configId").value =
+          query.configId || query.cid;
+      }
+
+      // notes (?notes=fast%20please)
+      if (query.notes) {
+        document.getElementById("notes").value = query.notes;
+      }
+
+      // Initialise debug panel with URL-derived config
+      updateConfigDebug();
+
+      // --- Listen for Vectary (or other) postMessage events ---
+      window.addEventListener("message", (event) => {
+        const data = event.data;
+
+        // Expecting messages like:
+        // { source: "vectary", type: "configUpdate", product, price, configId, notes, config: {...} }
+        if (!data || data.source !== "vectary" || data.type !== "configUpdate") {
+          return;
+        }
+
+        latestConfigSource = "vectary";
+
+        // Use data.config as base, but keep the whole message as raw reference
+        latestConfig = {
+          ...(data.config || {}),
+          raw: data
+        };
+
+        // Optionally update form fields if present in message
+        if (data.product) {
+          const productSelect = document.getElementById("product");
+          const option = Array.from(productSelect.options).find(
+            (opt) => opt.value === data.product
+          );
+          if (option) productSelect.value = data.product;
+        }
+
+        if (typeof data.price !== "undefined") {
+          document.getElementById("price").value = data.price;
+        }
+
+        if (data.configId) {
+          document.getElementById("configId").value = data.configId;
+        }
+
+        if (data.notes) {
+          document.getElementById("notes").value = data.notes;
+        }
+
+        updateConfigDebug();
+      });
+
+      // --- Form submit handler (build payload + POST) ---
+      const form = document.getElementById("quoteForm");
+      const output = document.getElementById("output");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const payload = {
+          leadName: document.getElementById("leadName").value,
+          leadEmail: document.getElementById("leadEmail").value,
+          companyName: document.getElementById("companyName").value,
+          notes: document.getElementById("notes").value,
+          product: document.getElementById("product").value,
+          price: Number(document.getElementById("price").value),
+          configId: document.getElementById("configId").value,
+          sourceUrl: window.location.href,
+          config: {
+            ...latestConfig,
+            _source: latestConfigSource
+          }
+        };
+
+        output.textContent = "Sending request...";
+
+        try {
+          const res = await fetch("/.netlify/functions/send-quote-lead", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const text = await res.text();
+          output.textContent = "Status: " + res.status + "\n\n" + text;
+        } catch (err) {
+          output.textContent = "Error:\n" + err.message;
+        }
+      });
+    </script>
+  </body>
+</html>

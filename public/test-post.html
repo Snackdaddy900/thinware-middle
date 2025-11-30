@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>send-quote-lead Test POST</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 1rem;
+      }
+      button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 1rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test POST → send-quote-lead</h1>
+    <p>
+      Click the button below to send a test JSON payload to
+      <code>/.netlify/functions/send-quote-lead</code>.
+    </p>
+    <button id="sendBtn">Send test payload</button>
+
+    <h2>Response:</h2>
+    <pre id="output">No request sent yet.</pre>
+
+    <script>
+      const payload = {
+        leadName: "Stuart Smith",
+        leadEmail: "stuart@powercore.nz",
+        companyName: "Working Logic Ltd",
+        notes: "Customer wants 3m cable length + PowerTrac option.",
+        product: "DeskPowerRail",
+        config: {
+          variant: "QuickLink",
+          color: "black",
+          length_mm: 1200,
+          options: {
+            power_module: "Indukt Hub",
+            cable: "FlexiKabel",
+            cable_length: "3m"
+          }
+        },
+        price: 399,
+        configId: "QKLINK-1200-BLK-3M",
+        sourceUrl: "https://config.nz/?v=quicklink&len=1200&col=blk"
+      };
+
+      const btn = document.getElementById("sendBtn");
+      const output = document.getElementById("output");
+
+      btn.addEventListener("click", async () => {
+        output.textContent = "Sending request...";
+        try {
+          const res = await fetch("/.netlify/functions/send-quote-lead", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const text = await res.text();
+          output.textContent =
+            "Status: " + res.status + " " + res.statusText + "\n\n" + text;
+        } catch (err) {
+          output.textContent = "Error sending request:\n" + err.message;
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -124,7 +124,7 @@ exports.handler = async (event, context) => {
     // --- Email setup ---
     const RESEND_API_KEY = process.env.resend_api_key;
     const RESEND_FROM_EMAIL =
-      process.env.resend_from_email || "Quotes <no-reply@example.com>";
+      "Thinware Quotes <onboarding@resend.dev>";
     const RESEND_ADMIN_EMAIL =
       process.env.resend_admin_email || "admin@example.com";
 

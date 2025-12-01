@@ -104,7 +104,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Normalised summary object (what we log & include in email)
+    // Normalised summary object (what we log & include in email response)
     const summary = {
       lead: {
         name: leadName,
@@ -123,10 +123,13 @@ exports.handler = async (event, context) => {
 
     // --- Email setup ---
     const RESEND_API_KEY = process.env.resend_api_key;
-    const RESEND_FROM_EMAIL =
-      "Thinware Quotes <onboarding@resend.dev>";
+
+    // Always use Resend sandbox sender to avoid domain verification
+    const RESEND_FROM_EMAIL = "Thinware Quotes <onboarding@resend.dev>";
+
+    // Admin (you) – Resend test mode only allows sending to this address
     const RESEND_ADMIN_EMAIL =
-      process.env.resend_admin_email || "admin@example.com";
+      process.env.resend_admin_email || "stuart@powercore.nz";
 
     // Build email HTML
     const html = `
@@ -166,10 +169,14 @@ exports.handler = async (event, context) => {
       console.warn(
         "RESEND_API_KEY not set. Skipping email send but returning success."
       );
+    } else if (!RESEND_ADMIN_EMAIL) {
+      console.warn(
+        "RESEND_ADMIN_EMAIL not set. Skipping email send but returning success."
+      );
     } else {
       try {
-        // Send to admin + lead
-        const recipients = [RESEND_ADMIN_EMAIL, leadEmail].filter(Boolean);
+        // IMPORTANT: Resend test mode → only send to admin (you)
+        const recipients = [RESEND_ADMIN_EMAIL];
 
         await sendEmailWithResend({
           apiKey: RESEND_API_KEY,

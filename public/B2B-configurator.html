@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3D B2B – Price It Up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-main: #c7d8cf;
+      --bg-tabs: #f3f3f3;
+      --border-strong: #1b3930;
+      --text-main: #111;
+      --accent: #1b3930;
+      --radius: 8px;
+      --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: var(--text-main);
+      background-color: #ffffff;
+    }
+
+    main {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 24px;
+      background: #e6ece9;
+    }
+
+    .configurator-shell {
+      width: 100%;
+      max-width: 1100px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 2fr);
+      gap: 0;
+      overflow: hidden;
+    }
+
+    @media (max-width: 800px) {
+      .configurator-shell {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .configurator-text {
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #f9faf9;
+    }
+
+    .configurator-text h1 {
+      font-size: 1.7rem;
+      margin: 0 0 8px;
+    }
+
+    .configurator-text p {
+      margin: 0 0 16px;
+      line-height: 1.4;
+    }
+
+    .primary-actions { margin-top: 24px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .btn:hover {
+      background: #25483d;
+      transform: translateY(-1px);
+      box-shadow: 0 7px 18px rgba(0,0,0,0.18);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      margin-left: 8px;
+      box-shadow: none;
+    }
+
+    .btn-outline:hover { background: #e0eae5; }
+
+    .configurator-iframe {
+      background: #000;
+      position: relative;
+      min-height: 280px;
+    }
+
+    .configurator-iframe iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ---------- Modal / Wizard ---------- */
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal.is-open { display: flex; }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    .modal-dialog {
+      position: relative;
+      width: 100%;
+      max-width: 820px;
+      background: var(--bg-main);
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--accent);
+      padding: 4px 8px;
+    }
+
+    .wizard-tabs {
+      display: flex;
+      background: var(--bg-tabs);
+      border-bottom: 1px solid #d5d5d5;
+    }
+
+    .wizard-tab {
+      flex: 1;
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 0.95rem;
+      cursor: default;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .wizard-tab.is-active {
+      border-bottom-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .wizard-body { padding: 28px 32px 24px; }
+
+    @media (max-width: 600px) {
+      .wizard-body { padding: 20px 18px 18px; }
+      .wizard-tab {
+        font-size: 0.8rem;
+        padding: 10px 8px;
+      }
+    }
+
+    .wizard-step { display: none; }
+    .wizard-step.is-active { display: block; }
+
+    .wizard-heading {
+      font-size: 1.7rem;
+      margin: 0 0 8px;
+    }
+
+    .wizard-copy {
+      margin: 0 0 20px;
+      line-height: 1.5;
+      max-width: 520px;
+    }
+
+    .config-summary {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-strong);
+      background: #f5f9f7;
+      min-height: 120px;
+      font-size: 0.9rem;
+      font-family: "Menlo", "SF Mono", "Roboto Mono", monospace;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 550px) {
+      .field-row { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.85rem;
+    }
+
+    .field label { font-weight: 500; }
+
+    .field input {
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      background: #fdfdfd;
+    }
+
+    .field input:focus {
+      outline: 2px solid #3f6c5e;
+      outline-offset: 1px;
+    }
+
+    .wizard-footer {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+    }
+
+    .wizard-footer span { opacity: 0.8; }
+    .wizard-footer .btn { min-width: 100px; }
+  </style>
+</head>
+<body>
+
+<main>
+  <section class="configurator-shell">
+    <div class="configurator-text">
+      <div>
+        <h1>Build your [product name]</h1>
+        <p>
+          Use the 3D configurator to set the size, finish and options that work
+          for your space. When you’re ready, we’ll send you a ballpark price by email.
+        </p>
+      </div>
+      <div class="primary-actions">
+        <button class="btn" id="open-quote-wizard">Price it up</button>
+      </div>
+    </div>
+
+    <div class="configurator-iframe">
+      <!-- TODO: replace src with your real Vectary embed URL -->
+      <iframe
+        src="https://example.com/your-vectary-embed"
+        title="3D Configurator"
+        loading="lazy"
+      ></iframe>
+    </div>
+  </section>
+</main>
+
+<!-- Modal: Quote Wizard -->
+<div class="modal" id="quote-wizard" aria-hidden="true">
+  <div class="modal-backdrop"></div>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="wizard-heading">
+    <button class="modal-close" type="button" aria-label="Close">×</button>
+
+    <nav class="wizard-tabs">
+      <div class="wizard-tab is-active" data-step="1">Price it up</div>
+      <div class="wizard-tab" data-step="2">Where do we send it?</div>
+      <div class="wizard-tab" data-step="3">Quote coming</div>
+    </nav>
+
+    <div class="wizard-body">
+      <!-- Step 1 -->
+      <section class="wizard-step is-active" data-step="1">
+        <h2 class="wizard-heading" id="wizard-heading">Price it up</h2>
+        <p class="wizard-copy">
+          These are the choices you made configuring your [product name].
+          If you’d like a ballpark price emailed to you, hit <strong>Next</strong>
+          and tell us where to send it.
+        </p>
+
+        <div class="config-summary" id="config-summary">
+Product:    Demo desk system
+Size:       1800 x 800 mm
+Frame:      Black
+Top:        Oak veneer
+Power:      2 x GPO, 2 x USB-C
+Cable mgmt: Under-desk tray
+Ref:        CFG-12345
+        </div>
+
+        <div class="wizard-footer">
+          <span>Step 1 of 3</span>
+          <button class="btn" type="button" data-next-step>Next</button>
+        </div>
+      </section>
+
+      <!-- Step 2 -->
+      <section class="wizard-step" data-step="2">
+        <h2 class="wizard-heading">Where do we send it?</h2>
+        <p class="wizard-copy">
+          We’ll email your quote and follow up only if something’s unclear.
+          No mailing lists, no spam.
+        </p>
+
+        <form id="quote-form">
+          <div class="field-row">
+            <div class="field">
+              <label for="first-name">First name</label>
+              <input id="first-name" name="firstName" autocomplete="given-name" />
+            </div>
+            <div class="field">
+              <label for="surname">Surname</label>
+              <input id="surname" name="surname" autocomplete="family-name" />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="company">Company name</label>
+              <input id="company" name="companyName" autocomplete="organization" />
+            </div>
+            <div class="field">
+              <label for="email">Email address</label>
+              <input id="email" name="email" type="email" autocomplete="email" />
+            </div>
+          </div>
+        </form>
+
+        <div class="wizard-footer">
+          <span>Step 2 of 3</span>
+          <button class="btn" type="button" id="submit-and-next">Next</button>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section class="wizard-step" data-step="3">
+        <h2 class="wizard-heading">Thanks for that…</h2>
+        <p class="wizard-copy">
+          An emailed quote will be with you soon once we’ve checked
+          pricing and availability for your options. Please allow up to
+          24 hours for us to firm this up.
+        </p>
+
+        <div class="wizard-footer">
+          <span>Step 3 of 3</span>
+          <button class="btn" type="button" data-close-wizard>Close</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const openBtn = document.getElementById("open-quote-wizard");
+    const modal = document.getElementById("quote-wizard");
+    const backdrop = modal.querySelector(".modal-backdrop");
+    const closeBtn = modal.querySelector(".modal-close");
+    const tabs = Array.from(modal.querySelectorAll(".wizard-tab"));
+    const steps = Array.from(modal.querySelectorAll(".wizard-step"));
+    const nextButtons = Array.from(modal.querySelectorAll("[data-next-step]"));
+    const closeWizardButtons = Array.from(modal.querySelectorAll("[data-close-wizard]"));
+    const submitAndNextBtn = document.getElementById("submit-and-next");
+    const form = document.getElementById("quote-form");
+    const configSummaryEl = document.getElementById("config-summary");
+    const productHeadingEl = document.querySelector(".configurator-text h1");
+
+    let currentStep = 1;
+
+    function openModal() {
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      currentStep = 1;
+      updateSteps();
+    }
+
+    function closeModal() {
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function updateSteps() {
+      steps.forEach(step => {
+        const stepNum = Number(step.getAttribute("data-step"));
+        step.classList.toggle("is-active", stepNum === currentStep);
+      });
+
+      tabs.forEach(tab => {
+        const stepNum = Number(tab.getAttribute("data-step"));
+        tab.classList.toggle("is-active", stepNum === currentStep);
+      });
+    }
+
+    function goToStep(stepNum) {
+      currentStep = Math.min(Math.max(stepNum, 1), steps.length);
+      updateSteps();
+    }
+
+    openBtn.addEventListener("click", openModal);
+    backdrop.addEventListener("click", closeModal);
+    closeBtn.addEventListener("click", closeModal);
+
+    nextButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        goToStep(currentStep + 1);
+      });
+    });
+
+    closeWizardButtons.forEach(btn => {
+      btn.addEventListener("click", closeModal);
+    });
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        const stepNum = Number(tab.getAttribute("data-step"));
+        if (stepNum <= currentStep) {
+          goToStep(stepNum);
+        }
+      });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && modal.classList.contains("is-open")) {
+        closeModal();
+      }
+    });
+
+    // ---- Netlify hook: POST to send-quote-lead, then go to step 3 ----
+    async function handleSubmitAndNext() {
+      const firstName = form.firstName.value.trim();
+      const surname = form.surname.value.trim();
+      const companyName = form.companyName.value.trim();
+      const email = form.email.value.trim();
+      const leadName = (firstName + " " + surname).trim();
+
+      if (!leadName || !email) {
+        alert("Please add at least your name and email.");
+        return;
+      }
+
+      const payload = {
+        // adjust these keys to match your function if needed
+        leadName,
+        leadEmail: email,
+        companyName,
+        product: productHeadingEl.textContent.trim(),
+        config: configSummaryEl.textContent.trim(),
+        // placeholders for now – your function can ignore if not needed
+        notes: "",
+        price: "",
+        configId: "",
+        sourceUrl: window.location.href
+      };
+
+      try {
+        const res = await fetch("/.netlify/functions/send-quote-lead", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          console.error("Function error", await res.text());
+          alert("Something went wrong sending your quote request. Please try again.");
+          return;
+        }
+
+        // If we get here, assume OK and move to step 3
+        goToStep(3);
+      } catch (err) {
+        console.error("Network error", err);
+        alert("Network error sending your quote request.");
+      }
+    }
+
+    submitAndNextBtn.addEventListener("click", handleSubmitAndNext);
+  })();
+</script>
+
+</body>
+</html>

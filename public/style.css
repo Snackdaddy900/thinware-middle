@@ -22,7 +22,7 @@ body {
   display: block;
 }
 
-/* === FROSTED MODAL — darker + more contrast === */
+/* === FROSTED MODAL — darker frost + soft subtle shadow === */
 .frosted-modal {
   position: fixed;
   top: 50%;
@@ -35,37 +35,39 @@ body {
   padding: 22px;
   border-radius: 18px;
 
-  /* darker glass for contrast */
+  /* darker frost for field contrast */
   background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
 
-  box-shadow: none; /* flat */
+  /* SOFT floating shadow (not pushy) */
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
+
   color: #222;
   display: none;
 }
 
 .frosted-modal p {
   margin: 0 0 12px;
-  font-size: 12px;            /* reduced */
+  font-size: 12px;
   color: #555;
 }
 
-/* === TITLE — smaller + calm === */
+/* === HEADING — smaller, calm === */
 .modal-title {
-  font-size: 17px;            /* reduced */
+  font-size: 17px;
   font-weight: 600;
   margin: 0 0 14px;
   color: #111;
 }
 
-/* === INPUT FIELDS — unchanged shape, smaller text === */
+/* === INPUT FIELDS — clean, soft === */
 .modal-input {
   width: 100%;
-  padding: 8px 10px;          /* slightly smaller */
+  padding: 8px 10px;
   margin-bottom: 10px;
 
-  font-size: 13px;            /* reduced */
+  font-size: 13px;
 
   background: rgba(255, 255, 255, 0.95);
   color: #222;
@@ -85,13 +87,13 @@ body {
   outline-offset: 1px;
 }
 
-/* === BUTTON — smaller text, keep hover === */
+/* === BUTTON — small, quiet === */
 .modal-button {
   width: 100%;
   margin-top: 12px;
   padding: 8px 0;
 
-  font-size: 13px;            /* reduced */
+  font-size: 13px;
   font-weight: 500;
 
   background: #ffffff;
@@ -135,6 +137,7 @@ body {
     padding: 7px 9px;
   }
 }
+
 
 
 

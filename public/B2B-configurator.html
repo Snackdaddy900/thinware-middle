@@ -2,33 +2,81 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Configurator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>B2B Configurator – Check your configuration</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
   <!-- Fullscreen Vectary iframe -->
-  <iframe 
+  <iframe
     class="fullscreen-iframe"
     src="https://app.vectary.com/p/2FJYYQ9lO2dXHFwpk31gUe"
-    allow="xr-spatial-tracking; fullscreen;">
-  </iframe>
+    allow="xr-spatial-tracking; fullscreen"
+    title="3D product configurator"
+  ></iframe>
 
   <!-- Modal #1 — Check configuration -->
-  <div id="modal-config" class="frosted-modal" style="display:block;">
-    <h1 class="modal-title">Check your configuration</h1>
-    <button class="modal-button" onclick="nextStep()">Continue</button>
+  <div
+    id="modal-config"
+    class="frosted-modal"
+    style="display: block;"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-config-title"
+  >
+    <h1 id="modal-config-title" class="modal-title">
+      Check your configuration
+    </h1>
+
+    <!-- Configuration summary -->
+    <p id="config-box">Box = Not set</p>
+    <p id="config-sphere">Sphere = Not set</p>
+
+    <button
+      class="modal-button"
+      type="button"
+      onclick="goToQuoteForm()"
+    >
+      Get a price
+    </button>
   </div>
 
-<script>
-function nextStep() {
-    window.location.href = "quote-form.html";
-}
-</script>
+  <script>
+    function loadConfigSummary() {
+      const params = new URLSearchParams(window.location.search);
+
+      // Support both Box/box and Sphere/sphere just in case
+      const box =
+        params.get("Box") ||
+        params.get("box") ||
+        "Not set";
+
+      const sphere =
+        params.get("Sphere") ||
+        params.get("sphere") ||
+        "Not set";
+
+      document.getElementById("config-box").textContent =
+        "Box = " + box;
+
+      document.getElementById("config-sphere").textContent =
+        "Sphere = " + sphere;
+    }
+
+    function goToQuoteForm() {
+      // Carry the same query string through to the next step
+      const search = window.location.search || "";
+      window.location.href = "quote-form.html" + search;
+    }
+
+    window.addEventListener("DOMContentLoaded", loadConfigSummary);
+  </script>
 
 </body>
 </html>
+
 
 
 

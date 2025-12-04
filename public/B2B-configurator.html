@@ -2,309 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>flexiKabel configurator</title>
+  <title>flexiKabel – 3D Configurator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <style>
-    :root {
-      --bg-page: #f3f5f7;
-      --bg-card: #ffffff;
-      --border-soft: #e5e7eb;
-      --text-main: #111827;
-      --text-muted: #4b5563;
-      --accent: #111827;
-      --button-bg: #ffffff;
-      --button-border: #e5e7eb;
-      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.16);
-      --radius-card: 24px;
-      --radius-button: 999px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-      background: var(--bg-page);
-      color: var(--text-main);
-    }
-
-    main {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .fk-hero {
-      flex: 0 0 auto;
-      min-height: 65vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem 1.5rem 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .fk-hero-inner {
-      width: 100%;
-      max-width: 960px;
-      display: grid;
-      grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
-      gap: 3rem;
-      align-items: center;
-    }
-
-    .fk-card-wrap {
-      position: relative;
-    }
-
-    .fk-card-shadow {
-      position: absolute;
-      inset: 18px -12px -18px 18px;
-      border-radius: var(--radius-card);
-      background: linear-gradient(
-        140deg,
-        rgba(15, 23, 42, 0.16),
-        rgba(148, 163, 184, 0.08)
-      );
-      filter: blur(12px);
-      opacity: 0.45;
-      z-index: 0;
-    }
-
-    .fk-card {
-      position: relative;
-      z-index: 1;
-      background: var(--bg-card);
-      border-radius: var(--radius-card);
-      box-shadow: var(--shadow-soft);
-      padding: 2.25rem 2.25rem 2rem;
-      border: 1px solid rgba(209, 213, 219, 0.6);
-      backdrop-filter: blur(10px);
-    }
-
-    .fk-logo-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-bottom: 1.4rem;
-      gap: 0.75rem;
-    }
-
-    .fk-logo-text {
-      font-size: 1.65rem;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-    }
-
-    .fk-logo-icon {
-      font-size: 1.35rem;
-      opacity: 0.9;
-    }
-
-    .fk-tagline {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: #9ca3af;
-      margin-bottom: 0.75rem;
-    }
-
-    .fk-body {
-      font-size: 0.9rem;
-      line-height: 1.6;
-      color: var(--text-muted);
-      margin-bottom: 1.75rem;
-    }
-
-    .fk-body .em {
-      color: var(--text-main);
-      font-weight: 600;
-    }
-
-    .fk-footer-row {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 0.75rem;
-    }
-
-    .fk-cta-label {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: #9ca3af;
-    }
-
-    .fk-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.85rem 1.9rem;
-      border-radius: var(--radius-button);
-      border: 1px solid var(--button-border);
-      background: var(--button-bg);
-      color: var(--accent);
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-transform: lowercase;
-      cursor: pointer;
-      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
-      transition: transform 120ms ease, box-shadow 120ms ease,
-        background-color 120ms ease, border-color 120ms ease;
-    }
-
-    .fk-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.2);
-      background: #f9fafb;
-      border-color: #d1d5db;
-    }
-
-    .fk-hero-visual {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .fk-cube {
-      width: 140px;
-      height: 140px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, #e5e7eb, #f9fafb);
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
-      transform: translateY(0) rotateX(20deg) rotateY(-18deg);
-    }
-
-    .fk-cube-shadow {
-      position: absolute;
-      width: 160px;
-      height: 40px;
-      border-radius: 999px;
-      background: radial-gradient(
-        ellipse at center,
-        rgba(15, 23, 42, 0.33),
-        transparent 70%
-      );
-      filter: blur(6px);
-      transform: translateY(75px);
-      opacity: 0.7;
-    }
-
-    #configurator-section {
-      flex: 1 0 auto;
-      padding: 2.5rem 1.5rem 3.5rem;
-      background: linear-gradient(
-        to bottom,
-        rgba(148, 163, 184, 0.12),
-        rgba(248, 250, 252, 1)
-      );
-    }
-
-    .configurator-inner {
-      max-width: 1080px;
-      margin: 0 auto;
-    }
-
-    .configurator-frame {
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid #e5e7eb;
-      background: #0f172a;
-      min-height: 420px;
-    }
-
-    .configurator-frame iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-  </style>
+  <!-- Main styles for this page -->
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
 <main>
+  <section class="configurator-shell">
 
-  <!-- HERO -->
-  <section class="fk-hero">
-    <div class="fk-hero-inner">
-      <div class="fk-card-wrap">
-        <div class="fk-card-shadow"></div>
-
-        <article class="fk-card">
-
-          <div class="fk-logo-row">
-            <div class="fk-logo-text">flexiKabel</div>
-            <div class="fk-logo-icon">🪛</div>
-          </div>
-
-          <div class="fk-tagline">desk cabling, without the drama</div>
-
-          <div class="fk-body">
-            flexiKabel is our <span class="em">low-cost, modular</span>
-            desk cabling system. Explore the layout in 3D, then click
-            below to price it up.
-          </div>
-
-          <div class="fk-footer-row">
-            <div class="fk-cta-label">step 1 · explore in 3d</div>
-            <button id="start-configurator-btn" class="fk-btn">start here</button>
-          </div>
-
-        </article>
-      </div>
-
-      <div class="fk-hero-visual" aria-hidden="true">
-        <div class="fk-cube"></div>
-        <div class="fk-cube-shadow"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONFIGURATOR -->
-  <section id="configurator-section">
-    <div class="configurator-inner">
-
-      <h2 style="font-size: 0.9rem; text-transform: uppercase; color:#9ca3af; letter-spacing: 0.16em; margin-bottom: 0.4rem;">
-        Step 2 · price it up
-      </h2>
-
-      <p style="color:#4b5563; margin-bottom: 1.4rem;">
-        Adjust the layout in the configurator below. When you're ready,
-        send it through to get a live price.
+    <!-- Left-hand intro copy -->
+    <div class="configurator-text">
+      <h1>flexiKabel</h1>
+      <p>
+        Use the 3D view to explore the flexiKabel layout. When you're ready,
+        hit <strong>start here</strong> to walk through a simple pricing flow.
       </p>
+    </div>
 
-      <div class="configurator-frame">
-        <iframe
-          src="https://app.vectary.com/p/2FJYYQ9lO2dXHFwpk31gUe"
-          title="flexiKabel layout configurator">
-        </iframe>
+    <!-- Right-hand 3D viewer + frosted panel -->
+    <div class="configurator-iframe">
+
+      <!-- Vectary scene iframe -->
+      <iframe
+        src="https://app.vectary.com/p/2FJYYQ9lO2dXHFwpk31gUe"
+        frameborder="0"
+        width="100%"
+        height="480"
+        allow="xr-spatial-tracking; fullscreen;"
+        loading="lazy"
+        title="flexiKabel 3D scene"
+      ></iframe>
+
+      <!-- Frosted Thinware/Vectary-style panel -->
+      <div class="thinware-panel">
+        <div class="thinware-panel__logo">
+          <!-- Make sure this filename matches the PNG in /public -->
+          <img src="flexiKabel_Transparent.png" alt="flexiKabel" />
+        </div>
+
+        <div class="thinware-panel__divider"></div>
+
+        <div class="thinware-panel__text">
+          flexiKabel is our low-cost modular desk cabling system.
+          Explore the layout in 3D, then click below to price it up.
+        </div>
+
+        <button class="thinware-panel__button" id="start-here-btn">
+          start here
+        </button>
       </div>
 
     </div>
-  </section>
 
+  </section>
 </main>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const startBtn = document.getElementById("start-configurator-btn");
-    const section = document.getElementById("configurator-section");
-
-    startBtn.addEventListener("click", () => {
-      section.scrollIntoView({ behavior: "smooth" });
-    });
+  // Hook for the B2B “price it up” / quote flow
+  document.getElementById("start-here-btn").addEventListener("click", () => {
+    console.log("Start flow triggered.");
+    // TODO: later we’ll redirect or open your quote form / popup here
+    // e.g. window.location.href = "quote-form.html";
   });
 </script>
 
 </body>
 </html>
+
 
 

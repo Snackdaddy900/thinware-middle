@@ -1,4 +1,4 @@
-/* === GLOBAL RESETS === */
+/* === GLOBAL RESET === */
 *,
 *::before,
 *::after {
@@ -11,8 +11,8 @@ body {
   padding: 0;
   height: 100%;
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #000000; /* mostly covered by the iframe, but safer behind it */
-  color: #ffffff;
+  background: #ffffff;
+  color: #222222;
   line-height: 1.4;
 }
 
@@ -24,110 +24,26 @@ body {
   display: block;
 }
 
-/* === FROSTED MODAL === */
+/* === FROSTED MODAL (QuickLink style — light, flat, subtle) === */
 .frosted-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
   width: 100%;
   max-width: 420px;
-  padding: 28px 24px;
-  border-radius: 16px;
-  background: rgba(12, 12, 12, 0.55);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  z-index: 1000;
-  color: #ffffff;
-  display: none; /* toggled via inline style or JS */
-}
 
-/* Make paragraph text inside modals behave nicely */
-.frosted-modal p {
-  margin: 0 0 16px;
-  font-size: 15px;
-  opacity: 0.9;
-}
+  padding: 20px 22px 18px;
+  border-radius: 14px;
 
-/* === TITLES === */
-.modal-title {
-  font-size: 24px;
-  font-weight: 600;
-  margin: 0 0 20px;
-}
+  /* Light, soft frosted background */
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 
-/* === BUTTON – PRIMARY CTA === */
-.modal-button {
-  width: 100%;
-  margin-top: 20px;
-  padding: 14px 0;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  background: #ffffff;
-  color: #000000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  transition:
-    background 0.12s ease-out,
-    transform 0.08s ease-out,
-    box-shadow 0.08s ease-out;
-}
+  /* No shadows — flat UI like your reference */
+  box-shadow:
 
-.modal-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-}
-
-.modal-button:active {
-  transform: translateY(0);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
-}
-
-.modal-button:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.8);
-  outline-offset: 2px;
-}
-
-/* === FORM FIELDS === */
-.modal-input {
-  width: 100%;
-  padding: 11px 12px;
-  margin-bottom: 14px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  font-size: 15px;
-  background: rgba(255, 255, 255, 0.95);
-  color: #111111;
-}
-
-.modal-input::placeholder {
-  color: #666666;
-}
-
-.modal-input:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.9);
-  outline-offset: 1px;
-}
-
-/* === SMALL SCREENS === */
-@media (max-width: 480px) {
-  .frosted-modal {
-    padding: 20px 16px;
-    border-radius: 14px;
-  }
-
-  .modal-title {
-    font-size: 20px;
-    margin-bottom: 16px;
-  }
-
-  .modal-button {
-    font-size: 15px;
-    padding: 12px 0;
-  }
-}
 
 

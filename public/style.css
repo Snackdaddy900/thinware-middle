@@ -1,10 +1,19 @@
 /* === GLOBAL RESETS === */
-body, html {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Inter', sans-serif;
-  background: #ffffff;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #000000; /* mostly covered by the iframe, but safer behind it */
+  color: #ffffff;
+  line-height: 1.4;
 }
 
 /* === FULLSCREEN IFRAME === */
@@ -12,6 +21,7 @@ body, html {
   width: 100%;
   height: 100vh;
   border: none;
+  display: block;
 }
 
 /* === FROSTED MODAL === */
@@ -20,26 +30,34 @@ body, html {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 420px;
-  padding: 32px;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 24px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(12, 12, 12, 0.55);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   z-index: 1000;
-  color: #fff;
-  display: none; /* toggled via JS */
+  color: #ffffff;
+  display: none; /* toggled via inline style or JS */
 }
 
-/* Heading */
+/* Make paragraph text inside modals behave nicely */
+.frosted-modal p {
+  margin: 0 0 16px;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+/* === TITLES === */
 .modal-title {
   font-size: 24px;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin: 0 0 20px;
 }
 
-/* Button – Vectary style */
+/* === BUTTON – PRIMARY CTA === */
 .modal-button {
   width: 100%;
   margin-top: 20px;
@@ -51,15 +69,65 @@ body, html {
   cursor: pointer;
   background: #ffffff;
   color: #000000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition:
+    background 0.12s ease-out,
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out;
 }
 
-/* Form fields */
+.modal-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.modal-button:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+
+.modal-button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+/* === FORM FIELDS === */
 .modal-input {
   width: 100%;
-  padding: 12px;
+  padding: 11px 12px;
   margin-bottom: 14px;
-  border: none;
   border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   font-size: 15px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111111;
 }
+
+.modal-input::placeholder {
+  color: #666666;
+}
+
+.modal-input:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 1px;
+}
+
+/* === SMALL SCREENS === */
+@media (max-width: 480px) {
+  .frosted-modal {
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .modal-button {
+    font-size: 15px;
+    padding: 12px 0;
+  }
+}
+
 

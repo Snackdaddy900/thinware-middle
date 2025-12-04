@@ -1,284 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Quote Request Form</title>
-    <style>
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        max-width: 900px;
-        margin: 2rem auto;
-        padding: 1rem;
-        display: grid;
-        grid-template-columns: 1.2fr 1fr;
-        gap: 2rem;
-      }
-      main {
-        grid-column: 1 / 2;
-      }
-      aside {
-        grid-column: 2 / 3;
-      }
-      input,
-      textarea,
-      select {
-        width: 100%;
-        padding: 0.5rem;
-        margin-bottom: 1rem;
-        font-size: 1rem;
-      }
-      button {
-        padding: 0.7rem 1.4rem;
-        font-size: 1rem;
-        cursor: pointer;
-      }
-      pre {
-        background: #f4f4f4;
-        padding: 1rem;
-        white-space: pre-wrap;
-        margin-top: 0.5rem;
-      }
-      code {
-        background: #eee;
-        padding: 0 0.2rem;
-      }
-      .card {
-        border: 1px solid #ddd;
-        padding: 1rem;
-        margin-bottom: 1rem;
-      }
-      iframe {
-        width: 100%;
-        height: 320px;
-        border: 1px solid #ccc;
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>Request a Quote</h1>
+<head>
+  <meta charset="UTF-8" />
+  <title>flexiKabel – Request a quote</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Tiny bit of local styling just for form layout -->
+  <style>
+    .thinware-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .thinware-form-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .thinware-form-row > div {
+      flex: 1;
+    }
+
+    .thinware-label {
+      display: block;
+      font-size: 10px;
+      margin-bottom: 2px;
+    }
+
+    .thinware-input {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 11px;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.18);
+      font-family: inherit;
+    }
+
+    .thinware-error {
+      margin-top: 6px;
+      font-size: 10px;
+      color: #b00020;
+      display: none;
+    }
+
+    .thinware-success {
+      margin-top: 6px;
+      font-size: 10px;
+      color: #0a6b3a;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<main>
+  <section class="configurator-shell">
+
+    <!-- Left-hand copy -->
+    <div class="configurator-text">
+      <h1>Where do we send your price?</h1>
       <p>
-        This form builds a JSON payload from the inputs
-        <strong>plus any URL parameters or Vectary messages</strong> and sends
-        it to <code>/.netlify/functions/send-quote-lead</code>.
+        Pop in a few details and we’ll email you a ballpark price based on this
+        flexiKabel configuration. No spam, no drama.
       </p>
+    </div>
 
-      <form id="quoteForm">
-        <label>Lead Name</label>
-        <input type="text" id="leadName" placeholder="Your name" required />
+    <!-- Right-hand panel with form -->
+    <div class="configurator-iframe">
+      <div class="thinware-panel">
+        <div class="thinware-panel__logo">
+          <img src="flexiKabel_Transparent.png" alt="flexiKabel" />
+        </div>
 
-        <label>Email</label>
-        <input
-          type="email"
-          id="leadEmail"
-          placeholder="you@example.com"
-          required
-        />
+        <div class="thinware-panel__divider"></div>
 
-        <label>Company Name (optional)</label>
-        <input type="text" id="companyName" placeholder="Working Logic Ltd" />
+        <div class="thinware-panel__text">
+          Tell us who to send the quote to:
+        </div>
 
-        <label>Product</label>
-        <select id="product" required>
-          <option value="">-- choose product --</option>
-          <option value="DeskPowerRail">DeskPowerRail</option>
-          <option value="QuickLink Module">QuickLink Module</option>
-          <option value="SparkWall">SparkWall</option>
-        </select>
+        <form id="quote-form" class="thinware-form" novalidate>
+          <div class="thinware-form-row">
+            <div>
+              <label class="thinware-label" for="firstName">First Name *</label>
+              <input class="thinware-input" type="text" id="firstName" name="firstName" required />
+            </div>
+            <div>
+              <label class="thinware-label" for="surname">Surname *</label>
+              <input class="thinware-input" type="text" id="surname" name="surname" required />
+            </div>
+          </div>
 
-        <label>Price</label>
-        <input type="number" id="price" placeholder="399" required />
+          <div class="thinware-form-row">
+            <div>
+              <label class="thinware-label" for="companyName">Company name</label>
+              <input class="thinware-input" type="text" id="companyName" name="companyName" />
+            </div>
+          </div>
 
-        <label>Notes</label>
-        <textarea id="notes" placeholder="Add any details..."></textarea>
+          <div class="thinware-form-row">
+            <div>
+              <label class="thinware-label" for="email">Email address *</label>
+              <input class="thinware-input" type="email" id="email" name="email" required />
+            </div>
+          </div>
 
-        <label>Config ID</label>
-        <input type="text" id="configId" placeholder="QKLINK-1200-BLK-3M" />
+          <div class="thinware-error" id="form-error">
+            Something went wrong sending your request. Please check your details and try again.
+          </div>
+          <div class="thinware-success" id="form-success">
+            Sending your request…
+          </div>
 
-        <button type="submit">Send Quote Request</button>
-      </form>
-
-      <div class="card">
-        <h2>Server Response</h2>
-        <pre id="output">No request yet.</pre>
+          <button class="thinware-panel__button" type="submit">
+            Get my price
+          </button>
+        </form>
       </div>
-    </main>
+    </div>
 
-    <aside>
-      <div class="card">
-        <h2>Configurator (Vectary placeholder)</h2>
-        <p style="font-size: 0.9rem;">
-          Replace the <code>src</code> below with your Vectary embed URL. The
-          scene can send config via <code>postMessage</code> to this page.
-        </p>
-        <iframe
-          id="vectaryFrame"
-          src="about:blank"
-          title="Vectary Configurator"
-        ></iframe>
-      </div>
+  </section>
+</main>
 
-      <div class="card">
-        <h2>Latest Config</h2>
-        <p style="font-size: 0.9rem;">
-          Source:
-          <strong><span id="configSource">url</span></strong>
-          (<code>url</code> = URL parameters, <code>vectary</code> =
-          postMessage)
-        </p>
-        <pre id="configDebug">{}</pre>
-      </div>
-    </aside>
+<script>
+  const form = document.getElementById("quote-form");
+  const errorEl = document.getElementById("form-error");
+  const successEl = document.getElementById("form-success");
 
-    <script>
-      // --- Helper: parse URL query parameters into an object ---
-      function getQueryParams() {
-        const params = {};
-        const searchParams = new URLSearchParams(window.location.search);
-        for (const [key, value] of searchParams.entries()) {
-          params[key] = value;
-        }
-        return params;
-      }
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    errorEl.style.display = "none";
+    successEl.style.display = "none";
 
-      const query = getQueryParams();
+    const firstName = document.getElementById("firstName").value.trim();
+    const surname = document.getElementById("surname").value.trim();
+    const companyName = document.getElementById("companyName").value.trim();
+    const email = document.getElementById("email").value.trim();
 
-      // --- Build initial config from URL params ---
-      const configFromUrl = {
-        variant: query.variant || query.v || "unknown",
-        color: query.color || query.col || "unknown",
-        length_mm: query.length_mm
-          ? Number(query.length_mm)
-          : query.len
-          ? Number(query.len)
-          : 0,
-        raw: query
-      };
+    if (!firstName || !surname || !email) {
+      errorEl.textContent = "Please fill in first name, surname and email.";
+      errorEl.style.display = "block";
+      return;
+    }
 
-      let latestConfig = configFromUrl;
-      let latestConfigSource = "url";
+    successEl.textContent = "Sending your request…";
+    successEl.style.display = "block";
 
-      const configSourceEl = document.getElementById("configSource");
-      const configDebugEl = document.getElementById("configDebug");
+    const fullName = firstName + " " + surname;
+    const query = window.location.search || "";
+    const sourceUrl = window.location.href;
 
-      function updateConfigDebug() {
-        configSourceEl.textContent = latestConfigSource;
-        configDebugEl.textContent = JSON.stringify(latestConfig, null, 2);
-      }
+    const payload = {
+      leadName: fullName,
+      leadEmail: email,
+      companyName,
+      product: "flexiKabel",
+      config: query,     // URL parameters from Vectary, if any
+      configId: "",      // optional – leave blank for now
+      price: "",         // optional – thinware can add later
+      notes: "",
+      sourceUrl
+    };
 
-      // --- Prefill form fields from URL params where it makes sense ---
-
-      // product (?product=DeskPowerRail)
-      if (query.product) {
-        const productSelect = document.getElementById("product");
-        const option = Array.from(productSelect.options).find(
-          (opt) => opt.value === query.product
-        );
-        if (option) productSelect.value = query.product;
-      }
-
-      // price (?price=399 or ?p=399)
-      if (query.price || query.p) {
-        document.getElementById("price").value = query.price || query.p;
-      }
-
-      // configId (?configId=... or ?cid=...)
-      if (query.configId || query.cid) {
-        document.getElementById("configId").value =
-          query.configId || query.cid;
-      }
-
-      // notes (?notes=fast%20please)
-      if (query.notes) {
-        document.getElementById("notes").value = query.notes;
-      }
-
-      // Initialise debug panel with URL-derived config
-      updateConfigDebug();
-
-      // --- Listen for Vectary (or other) postMessage events ---
-      window.addEventListener("message", (event) => {
-        const data = event.data;
-
-        // Expecting messages like:
-        // { source: "vectary", type: "configUpdate", product, price, configId, notes, config: {...} }
-        if (!data || data.source !== "vectary" || data.type !== "configUpdate") {
-          return;
-        }
-
-        latestConfigSource = "vectary";
-
-        // Use data.config as base, but keep the whole message as raw reference
-        latestConfig = {
-          ...(data.config || {}),
-          raw: data
-        };
-
-        // Optionally update form fields if present in message
-        if (data.product) {
-          const productSelect = document.getElementById("product");
-          const option = Array.from(productSelect.options).find(
-            (opt) => opt.value === data.product
-          );
-          if (option) productSelect.value = data.product;
-        }
-
-        if (typeof data.price !== "undefined") {
-          document.getElementById("price").value = data.price;
-        }
-
-        if (data.configId) {
-          document.getElementById("configId").value = data.configId;
-        }
-
-        if (data.notes) {
-          document.getElementById("notes").value = data.notes;
-        }
-
-        updateConfigDebug();
+    try {
+      const res = await fetch("/.netlify/functions/send-quote-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
 
-      // --- Form submit handler (build payload + POST) ---
-      const form = document.getElementById("quoteForm");
-      const output = document.getElementById("output");
+      if (!res.ok) {
+        throw new Error("Request failed");
+      }
 
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+      // If the function returns JSON we don't really care – we just move on.
+      window.location.href = "quote-handoff.html";
+    } catch (err) {
+      console.error(err);
+      successEl.style.display = "none";
+      errorEl.textContent = "Something went wrong sending your request. Please try again.";
+      errorEl.style.display = "block";
+    }
+  });
+</script>
 
-        const payload = {
-          leadName: document.getElementById("leadName").value,
-          leadEmail: document.getElementById("leadEmail").value,
-          companyName: document.getElementById("companyName").value,
-          notes: document.getElementById("notes").value,
-          product: document.getElementById("product").value,
-          price: Number(document.getElementById("price").value),
-          configId: document.getElementById("configId").value,
-          sourceUrl: window.location.href,
-          config: {
-            ...latestConfig,
-            _source: latestConfigSource
-          }
-        };
-
-        output.textContent = "Sending request...";
-
-        try {
-          const res = await fetch("/.netlify/functions/send-quote-lead", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-          });
-
-          const text = await res.text();
-          output.textContent = "Status: " + res.status + "\n\n" + text;
-        } catch (err) {
-          output.textContent = "Error:\n" + err.message;
-        }
-      });
-    </script>
-  </body>
+</body>
 </html>

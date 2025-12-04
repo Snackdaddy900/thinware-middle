@@ -2,138 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Send this 3D config for a quote</title>
+  <title>flexiKabel – Quote on its way</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      max-width: 640px;
-      margin: 2rem auto;
-      padding: 1rem;
-      line-height: 1.5;
-    }
-    label { display: block; margin-top: 1rem; }
-    input, textarea {
-      width: 100%;
-      padding: 0.5rem;
-      box-sizing: border-box;
-      margin-top: 0.25rem;
-    }
-    button {
-      margin-top: 1.5rem;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      cursor: pointer;
-    }
-    .config-summary {
-      font-size: 0.9rem;
-      background: #f4f4f4;
-      padding: 0.75rem;
-      margin-top: 1rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .status {
-      margin-top: 1rem;
-      font-size: 0.95rem;
-    }
-  </style>
+
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <h1>Send this configuration for a quote</h1>
-  <p>Confirm your details and we’ll email this configuration through.</p>
 
-  <div id="configSummary" class="config-summary"></div>
+<main>
+  <section class="configurator-shell">
 
-  <form id="quoteForm">
-    <label>
-      Your name
-      <input type="text" name="leadName" required />
-    </label>
+    <!-- Left-hand copy -->
+    <div class="configurator-text">
+      <h1>Quote coming your way</h1>
+      <p>
+        Thanks for sending through your flexiKabel configuration. We’ll review it,
+        check pricing and availability, and email you a ballpark figure.
+      </p>
+    </div>
 
-    <label>
-      Your email
-      <input type="email" name="leadEmail" required />
-    </label>
+    <!-- Right-hand panel with thank-you message -->
+    <div class="configurator-iframe">
+      <div class="thinware-panel">
+        <div class="thinware-panel__logo">
+          <img src="flexiKabel_Transparent.png" alt="flexiKabel" />
+        </div>
 
-    <label>
-      Company (optional)
-      <input type="text" name="companyName" />
-    </label>
+        <div class="thinware-panel__divider"></div>
 
-    <label>
-      Notes (optional)
-      <textarea name="notes" rows="3" placeholder="Anything special we should know?"></textarea>
-    </label>
+        <div class="thinware-panel__text">
+          Thanks for that.
+          <br><br>
+          An emailed quote will be with you soon once we've checked the pricing and
+          availability of your options. Please allow up to 24 hours for us to firm this up.
+        </div>
 
-    <button type="submit">Send configuration</button>
-  </form>
+        <button class="thinware-panel__button" onclick="window.location.href='B2B-configurator.html'">
+          Back to configurator
+        </button>
+      </div>
+    </div>
 
-  <div id="status" class="status"></div>
+  </section>
+</main>
 
-  <script>
-    // --- 1. Parse URL parameters (from Vectary) ---
-    const params = new URLSearchParams(window.location.search);
-    const configObject = Object.fromEntries(params.entries());
-
-    const product = params.get("product") || "Cubes & Spheres Test";
-    const price = params.get("price") || "";
-    const configId = params.get("configId") || "";
-
-    // Show a simple summary
-    const configSummaryEl = document.getElementById("configSummary");
-    configSummaryEl.textContent =
-      "Product: " + product + (price ? " | Price: " + price : "") +
-      (configId ? " | Config ID: " + configId : "") +
-      "\n\nFull configuration:\n" + JSON.stringify(configObject, null, 2);
-
-    // --- 2. Handle submit & POST to Netlify function ---
-    const form = document.getElementById("quoteForm");
-    const statusEl = document.getElementById("status");
-
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      statusEl.textContent = "Sending configuration…";
-
-      const formData = new FormData(form);
-      const leadName = formData.get("leadName");
-      const leadEmail = formData.get("leadEmail");
-      const companyName = formData.get("companyName") || "";
-      const notes = formData.get("notes") || "";
-
-      const payload = {
-        leadName,
-        leadEmail,
-        companyName,
-        notes,
-        product,
-        config: configObject,      // EVERYTHING from the URL
-        price,
-        configId,
-        sourceUrl: window.location.href
-      };
-
-      try {
-        const res = await fetch("/.netlify/functions/send-quote-lead", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && data.ok !== false) {
-          statusEl.textContent = "Done – your configuration has been sent.";
-          form.reset();
-        } else {
-          statusEl.textContent =
-            "Sorry, something went wrong sending the configuration.";
-        }
-      } catch (err) {
-        console.error(err);
-        statusEl.textContent =
-          "Network error – please try again in a moment.";
-      }
-    });
-  </script>
 </body>
 </html>
+

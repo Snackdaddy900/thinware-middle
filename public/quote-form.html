@@ -2,190 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>flexiKabel – Request a quote</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <title>Quote Form</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Tiny bit of local styling just for form layout -->
-  <style>
-    .thinware-form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 4px;
-    }
-
-    .thinware-form-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .thinware-form-row > div {
-      flex: 1;
-    }
-
-    .thinware-label {
-      display: block;
-      font-size: 10px;
-      margin-bottom: 2px;
-    }
-
-    .thinware-input {
-      width: 100%;
-      padding: 6px 8px;
-      font-size: 11px;
-      border-radius: 6px;
-      border: 1px solid rgba(0,0,0,0.18);
-      font-family: inherit;
-    }
-
-    .thinware-error {
-      margin-top: 6px;
-      font-size: 10px;
-      color: #b00020;
-      display: none;
-    }
-
-    .thinware-success {
-      margin-top: 6px;
-      font-size: 10px;
-      color: #0a6b3a;
-      display: none;
-    }
-  </style>
 </head>
 
 <body>
 
-<main>
-  <section class="configurator-shell">
+  <!-- Fullscreen iframe (same scene, keeps consistency) -->
+  <iframe 
+    class="fullscreen-iframe"
+    src="https://app.vectary.com/p/2FJYYQ9lO2dXHFwpk31gUe"
+    allow="xr-spatial-tracking; fullscreen;">
+  </iframe>
 
-    <!-- Left-hand copy -->
-    <div class="configurator-text">
-      <h1>Where do we send your price?</h1>
-      <p>
-        Pop in a few details and we’ll email you a ballpark price based on this
-        flexiKabel configuration. No spam, no drama.
-      </p>
-    </div>
+  <!-- Modal #2 — Contact details -->
+  <div id="modal-form" class="frosted-modal" style="display:block;">
+    <h1 class="modal-title">Tell us who to send the quote to</h1>
 
-    <!-- Right-hand panel with form -->
-    <div class="configurator-iframe">
-      <div class="thinware-panel">
-        <div class="thinware-panel__logo">
-          <img src="flexiKabel_Transparent.png" alt="flexiKabel" />
-        </div>
+    <input id="firstName" class="modal-input" placeholder="First Name" />
+    <input id="lastName" class="modal-input" placeholder="Surname" />
+    <input id="company" class="modal-input" placeholder="Company Name (optional)" />
+    <input id="email" class="modal-input" placeholder="Email Address" type="email" />
 
-        <div class="thinware-panel__divider"></div>
-
-        <div class="thinware-panel__text">
-          Tell us who to send the quote to:
-        </div>
-
-        <form id="quote-form" class="thinware-form" novalidate>
-          <div class="thinware-form-row">
-            <div>
-              <label class="thinware-label" for="firstName">First Name *</label>
-              <input class="thinware-input" type="text" id="firstName" name="firstName" required />
-            </div>
-            <div>
-              <label class="thinware-label" for="surname">Surname *</label>
-              <input class="thinware-input" type="text" id="surname" name="surname" required />
-            </div>
-          </div>
-
-          <div class="thinware-form-row">
-            <div>
-              <label class="thinware-label" for="companyName">Company name</label>
-              <input class="thinware-input" type="text" id="companyName" name="companyName" />
-            </div>
-          </div>
-
-          <div class="thinware-form-row">
-            <div>
-              <label class="thinware-label" for="email">Email address *</label>
-              <input class="thinware-input" type="email" id="email" name="email" required />
-            </div>
-          </div>
-
-          <div class="thinware-error" id="form-error">
-            Something went wrong sending your request. Please check your details and try again.
-          </div>
-          <div class="thinware-success" id="form-success">
-            Sending your request…
-          </div>
-
-          <button class="thinware-panel__button" type="submit">
-            Get my price
-          </button>
-        </form>
-      </div>
-    </div>
-
-  </section>
-</main>
+    <button class="modal-button" onclick="submitForm()">Send</button>
+  </div>
 
 <script>
-  const form = document.getElementById("quote-form");
-  const errorEl = document.getElementById("form-error");
-  const successEl = document.getElementById("form-success");
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    errorEl.style.display = "none";
-    successEl.style.display = "none";
-
-    const firstName = document.getElementById("firstName").value.trim();
-    const surname = document.getElementById("surname").value.trim();
-    const companyName = document.getElementById("companyName").value.trim();
-    const email = document.getElementById("email").value.trim();
-
-    if (!firstName || !surname || !email) {
-      errorEl.textContent = "Please fill in first name, surname and email.";
-      errorEl.style.display = "block";
-      return;
-    }
-
-    successEl.textContent = "Sending your request…";
-    successEl.style.display = "block";
-
-    const fullName = firstName + " " + surname;
-    const query = window.location.search || "";
-    const sourceUrl = window.location.href;
-
+function submitForm() {
     const payload = {
-      leadName: fullName,
-      leadEmail: email,
-      companyName,
-      product: "flexiKabel",
-      config: query,     // URL parameters from Vectary, if any
-      configId: "",      // optional – leave blank for now
-      price: "",         // optional – thinware can add later
-      notes: "",
-      sourceUrl
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        company: document.getElementById("company").value,
+        email: document.getElementById("email").value
     };
 
-    try {
-      const res = await fetch("/.netlify/functions/send-quote-lead", {
+    fetch("/.netlify/functions/send-quote-lead", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) {
-        throw new Error("Request failed");
-      }
-
-      // If the function returns JSON we don't really care – we just move on.
-      window.location.href = "quote-handoff.html";
-    } catch (err) {
-      console.error(err);
-      successEl.style.display = "none";
-      errorEl.textContent = "Something went wrong sending your request. Please try again.";
-      errorEl.style.display = "block";
-    }
-  });
+    })
+    .then(res => res.json())
+    .then(() => {
+        window.location.href = "quote-handoff.html";
+    })
+    .catch(err => console.error(err));
+}
 </script>
 
 </body>

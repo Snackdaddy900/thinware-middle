@@ -2,76 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>flexiKabel – 3D Configurator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Main styles for this page -->
+  <title>Configurator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-<main>
-  <section class="configurator-shell">
+  <!-- Fullscreen Vectary iframe -->
+  <iframe 
+    class="fullscreen-iframe"
+    src="https://app.vectary.com/p/2FJYYQ9lO2dXHFwpk31gUe"
+    allow="xr-spatial-tracking; fullscreen;">
+  </iframe>
 
-    <!-- Left-hand intro copy -->
-    <div class="configurator-text">
-      <h1>flexiKabel</h1>
-      <p>
-        Use the 3D view to explore the flexiKabel layout. When you're ready,
-        hit <strong>start here</strong> to walk through a simple pricing flow.
-      </p>
-    </div>
-
-    <!-- Right-hand 3D viewer + frosted panel -->
-    <div class="configurator-iframe">
-
-      <!-- Vectary scene iframe -->
-      <iframe
-        src="https://app.vectary.com/p/2FJYYQ9lO2dXHFwpk31gUe"
-        frameborder="0"
-        width="100%"
-        height="480"
-        allow="xr-spatial-tracking; fullscreen;"
-        loading="lazy"
-        title="flexiKabel 3D scene"
-      ></iframe>
-
-      <!-- Frosted Thinware/Vectary-style panel -->
-      <div class="thinware-panel">
-        <div class="thinware-panel__logo">
-          <!-- Make sure this filename matches the PNG in /public -->
-          <img src="flexiKabel_Transparent.png" alt="flexiKabel" />
-        </div>
-
-        <div class="thinware-panel__divider"></div>
-
-        <div class="thinware-panel__text">
-          flexiKabel is our low-cost modular desk cabling system.
-          Explore the layout in 3D, then click below to price it up.
-        </div>
-
-        <button class="thinware-panel__button" id="start-here-btn">
-          start here
-        </button>
-      </div>
-
-    </div>
-
-  </section>
-</main>
+  <!-- Modal #1 — Check configuration -->
+  <div id="modal-config" class="frosted-modal" style="display:block;">
+    <h1 class="modal-title">Check your configuration</h1>
+    <button class="modal-button" onclick="nextStep()">Continue</button>
+  </div>
 
 <script>
-  // When user clicks "start here", go to the quote form
-  // and carry any ?parameters through for later use.
-  document.getElementById("start-here-btn").addEventListener("click", () => {
-    const query = window.location.search || ""; // e.g. ?box=2&length=1200
-    window.location.href = "quote-form.html" + query;
-  });
+function nextStep() {
+    window.location.href = "quote-form.html";
+}
 </script>
 
 </body>
 </html>
+
 
 
 

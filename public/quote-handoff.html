@@ -2,50 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>flexiKabel – Quote on its way</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <title>Thank You</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-<main>
-  <section class="configurator-shell">
+  <!-- Fullscreen iframe again -->
+  <iframe 
+    class="fullscreen-iframe"
+    src="https://app.vectary.com/p/2FJYYQ9lO2dXHFwpk31gUe"
+    allow="xr-spatial-tracking; fullscreen;">
+  </iframe>
 
-    <!-- Left-hand copy -->
-    <div class="configurator-text">
-      <h1>Quote coming your way</h1>
-      <p>
-        Thanks for sending through your flexiKabel configuration. We’ll review it,
-        check pricing and availability, and email you a ballpark figure.
-      </p>
-    </div>
+  <!-- Modal #3 — Thank you -->
+  <div id="modal-thanks" class="frosted-modal" style="display:block;">
+    <h1 class="modal-title">Thanks</h1>
+    <p>We’ll review your configuration and send you a quote within 24 hours.</p>
+    <button class="modal-button" onclick="backToConfig()">Back</button>
+  </div>
 
-    <!-- Right-hand panel with thank-you message -->
-    <div class="configurator-iframe">
-      <div class="thinware-panel">
-        <div class="thinware-panel__logo">
-          <img src="flexiKabel_Transparent.png" alt="flexiKabel" />
-        </div>
-
-        <div class="thinware-panel__divider"></div>
-
-        <div class="thinware-panel__text">
-          Thanks for that.
-          <br><br>
-          An emailed quote will be with you soon once we've checked the pricing and
-          availability of your options. Please allow up to 24 hours for us to firm this up.
-        </div>
-
-        <button class="thinware-panel__button" onclick="window.location.href='B2B-configurator.html'">
-          Back to configurator
-        </button>
-      </div>
-    </div>
-
-  </section>
-</main>
+<script>
+function backToConfig() {
+    window.location.href = "B2B-configurator.html";
+}
+</script>
 
 </body>
 </html>

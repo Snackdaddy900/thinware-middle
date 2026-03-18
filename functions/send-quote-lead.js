@@ -46,9 +46,51 @@ function sendEmailWithResend({ apiKey, from, to, subject, html }) {
   });
 }
 
-exports.handler = async (event, context) => {
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function formatValue(value) {
+  if (value === null || value === undefined || value === "") {
+    return "(none)";
+  }
+
+  if (typeof value === "object") {
+    return `<pre style="background:#f4f4f4;padding:10px;border-radius:6px;white-space:pre-wrap;">${escapeHtml(
+      JSON.stringify(value, null, 2)
+    )}</pre>`;
+  }
+
+  return escapeHtml(value);
+}
+
+function renderKeyValueList(obj) {
+  const entries = Object.entries(obj || {});
+  if (entries.length === 0) {
+    return "<p>(none)</p>";
+  }
+
+  const items = entries
+    .map(
+      ([key, value]) =>
+        `<li><strong>${escapeHtml(key)}:</strong> ${
+          typeof value === "object" && value !== null
+            ? formatValue(value)
+            : formatValue(value)
+        }</li>`
+    )
+    .join("");
+
+  return `<ul>${items}</ul>`;
+}
+
+exports.handler = async (event) => {
   try {
-    // Only allow POST
     if (event.httpMethod !== "POST") {
       return {
         statusCode: 405,
@@ -59,7 +101,6 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Parse JSON body
     let payload;
     try {
       payload = JSON.parse(event.body || "{}");
@@ -74,24 +115,30 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Destructure with safe defaults
+    // Stable identity fields
     const {
       leadName,
       leadEmail,
+
+      // Optional known fields
       companyName = "",
       notes = "",
-      product,
-      config = {},
-      price = 0,
+      product = "",
+      price = "",
       configId = "",
-      sourceUrl = ""
+      sourceUrl = "",
+      routeKey = "",
+
+      // Preferred flexible bucket
+      config = {},
+
+      // Everything else from the configurator
+      ...extraFields
     } = payload;
 
-    // Basic required fields
     const missing = [];
     if (!leadName) missing.push("leadName");
     if (!leadEmail) missing.push("leadEmail");
-    if (!product) missing.push("product");
 
     if (missing.length > 0) {
       return {
@@ -104,62 +151,89 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Normalised summary object (what we log & include in email response)
+    // Routing:
+    // 1. Per-deployment default recipient from env
+    // 2. Optional routeKey mapping via env JSON
+    //
+    // Example env:
+    // LEAD_RECIPIENT_EMAIL=sales@customer.com
+    // ROUTE_KEY_MAP={"acme":"sales@acme.com","beta":"quotes@beta.com"}
+    let recipientEmail =
+      process.env.LEAD_RECIPIENT_EMAIL ||
+      process.env.resend_admin_email ||
+      "stuart@powercore.nz";
+
+    if (routeKey && process.env.ROUTE_KEY_MAP) {
+      try {
+        const routeMap = JSON.parse(process.env.ROUTE_KEY_MAP);
+        if (routeMap[routeKey]) {
+          recipientEmail = routeMap[routeKey];
+        }
+      } catch (err) {
+        console.warn("Invalid ROUTE_KEY_MAP JSON:", err.message);
+      }
+    }
+
     const summary = {
       lead: {
         name: leadName,
         email: leadEmail,
         company: companyName
       },
+      routeKey,
+      recipientEmail,
       product,
       price,
       configId,
       config,
       notes,
-      sourceUrl
+      sourceUrl,
+      extraFields
     };
 
     console.log("Received lead payload:", JSON.stringify(summary, null, 2));
 
-    // --- Email setup ---
     const RESEND_API_KEY = process.env.resend_api_key;
+    const RESEND_FROM_EMAIL =
+      process.env.RESEND_FROM_EMAIL ||
+      "Thinware Quotes <onboarding@resend.dev>";
 
-    // Always use Resend sandbox sender to avoid domain verification
-    const RESEND_FROM_EMAIL = "Thinware Quotes <onboarding@resend.dev>";
-
-    // Admin (you) – Resend test mode only allows sending to this address
-    const RESEND_ADMIN_EMAIL =
-      process.env.resend_admin_email || "stuart@powercore.nz";
-
-    // Build email HTML
     const html = `
       <h2>New Quote Request</h2>
+
       <h3>Lead Details</h3>
       <ul>
-        <li><strong>Name:</strong> ${leadName}</li>
-        <li><strong>Email:</strong> ${leadEmail}</li>
-        <li><strong>Company:</strong> ${companyName || "(none)"} </li>
+        <li><strong>Name:</strong> ${formatValue(leadName)}</li>
+        <li><strong>Email:</strong> ${formatValue(leadEmail)}</li>
+        <li><strong>Company:</strong> ${formatValue(companyName)}</li>
       </ul>
 
-      <h3>Product</h3>
+      <h3>Routing</h3>
       <ul>
-        <li><strong>Product:</strong> ${product}</li>
-        <li><strong>Price:</strong> ${price}</li>
-        <li><strong>Config ID:</strong> ${configId || "(none)"}</li>
+        <li><strong>Route Key:</strong> ${formatValue(routeKey)}</li>
+        <li><strong>Recipient:</strong> ${formatValue(recipientEmail)}</li>
+      </ul>
+
+      <h3>Known Metadata</h3>
+      <ul>
+        <li><strong>Product:</strong> ${formatValue(product)}</li>
+        <li><strong>Price:</strong> ${formatValue(price)}</li>
+        <li><strong>Config ID:</strong> ${formatValue(configId)}</li>
+        <li><strong>Source URL:</strong> ${
+          sourceUrl
+            ? `<a href="${escapeHtml(sourceUrl)}">${escapeHtml(sourceUrl)}</a>`
+            : "(none)"
+        }</li>
       </ul>
 
       <h3>Configuration</h3>
-      <pre style="background:#f4f4f4;padding:10px;">${JSON.stringify(
-        config,
-        null,
-        2
-      )}</pre>
+      ${renderKeyValueList(config)}
+
+      <h3>Additional Fields</h3>
+      ${renderKeyValueList(extraFields)}
 
       <h3>Notes</h3>
-      <p>${notes || "(none)"} </p>
-
-      <h3>Source</h3>
-      <p><a href="${sourceUrl}">${sourceUrl}</a></p>
+      <p>${formatValue(notes)}</p>
     `;
 
     let emailSent = false;
@@ -167,23 +241,20 @@ exports.handler = async (event, context) => {
 
     if (!RESEND_API_KEY) {
       console.warn(
-        "RESEND_API_KEY not set. Skipping email send but returning success."
+        "resend_api_key not set. Skipping email send but returning success."
       );
-    } else if (!RESEND_ADMIN_EMAIL) {
+    } else if (!recipientEmail) {
       console.warn(
-        "RESEND_ADMIN_EMAIL not set. Skipping email send but returning success."
+        "No recipient email configured. Skipping email send but returning success."
       );
     } else {
       try {
-        // IMPORTANT: Resend test mode → only send to admin (you)
-        const recipients = [RESEND_ADMIN_EMAIL];
-
         await sendEmailWithResend({
           apiKey: RESEND_API_KEY,
           from: RESEND_FROM_EMAIL,
-          to: recipients,
-          subject: `Quote request: ${product} ${
-            configId ? `(${configId})` : ""
+          to: [recipientEmail],
+          subject: `Quote request${product ? `: ${product}` : ""}${
+            configId ? ` (${configId})` : ""
           }`,
           html
         });

@@ -1,72 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quote Debug Version</title>
+  <title>Quote Debug</title>
   <style>
-    body { font-family: Arial; margin:0; background:#f0f0f0; }
-    .app { display:flex; height:100vh; }
-    iframe { flex:1; border:0; }
-    .panel {
-      width:350px;
-      padding:20px;
-      background:rgba(255,255,255,0.8);
-      backdrop-filter: blur(10px);
-    }
-    input, select, button { width:100%; margin-bottom:10px; padding:10px; }
-    #status { white-space:pre-wrap; font-size:12px; background:#eee; padding:10px; }
+    body { font-family: Arial; padding:20px; }
+    input, select, button { display:block; margin-bottom:10px; padding:10px; width:300px; }
+    #status { white-space:pre-wrap; background:#eee; padding:10px; }
   </style>
 </head>
 <body>
-<div class="app">
 
-<iframe src="https://app.vectary.com/p/6791c8cf-18aa-4bde-bd38-66b1cc9b878b"></iframe>
+<h2>Quote</h2>
 
-<div class="panel">
-  <h3>Quote</h3>
+<select id="product">
+  <option>Sphere</option>
+  <option>Sphere 1</option>
+  <option selected>Sphere 2</option>
+</select>
 
-  <select id="product">
-    <option>Sphere</option>
-    <option>Sphere 1</option>
-    <option selected>Sphere 2</option>
-  </select>
+<select id="finish">
+  <option>Green</option>
+  <option>Blue</option>
+  <option selected>Red</option>
+</select>
 
-  <select id="colour">
-    <option>Green</option>
-    <option>Blue</option>
-    <option selected>Red</option>
-  </select>
+<input id="quantity" type="number" value="10" />
 
-  <input id="quantity" type="number" value="10" />
+<input id="name" placeholder="Name" />
+<input id="email" placeholder="Email" />
 
-  <input id="name" placeholder="Name" />
-  <input id="email" placeholder="Email" />
+<button id="send">Send</button>
 
-  <button id="send">Send</button>
-
-  <div id="status"></div>
-</div>
-
-</div>
+<pre id="status"></pre>
 
 <script>
-const statusEl = document.getElementById('status');
+document.getElementById("send").addEventListener("click", async () => {
 
-function getPayload() {
-  return {
-    product: document.getElementById('product').value,
-    finish: document.getElementById('colour').value,
-    quantity: Number(document.getElementById('quantity').value),
+  // FORCE payload (no hidden logic)
+  const payload = {
+    product: document.getElementById("product").value,
+    finish: document.getElementById("finish").value,
+    quantity: Number(document.getElementById("quantity").value),
     lead: {
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value
+      name: document.getElementById("name").value,
+      email: document.getElementById("email").value
     }
   };
-}
-
-document.getElementById('send').addEventListener('click', async () => {
-  const payload = getPayload();
 
   try {
     const res = await fetch('/.netlify/functions/send-quote-lead', {
@@ -77,11 +56,12 @@ document.getElementById('send').addEventListener('click', async () => {
 
     const data = await res.json();
 
-    statusEl.textContent = JSON.stringify(data, null, 2);
+    document.getElementById("status").textContent = JSON.stringify(data, null, 2);
 
   } catch (err) {
-    statusEl.textContent = err.message;
+    document.getElementById("status").textContent = err.message;
   }
+
 });
 </script>
 

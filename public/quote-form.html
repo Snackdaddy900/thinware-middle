@@ -15,7 +15,7 @@
     allow="xr-spatial-tracking; fullscreen;">
   </iframe>
 
-  <!-- Modal #2 — Contact details -->
+  <!-- Modal — Contact details -->
   <div id="modal-form" class="frosted-modal" style="display:block;">
     <h1 class="modal-title">Tell us who to send the quote to</h1>
 
@@ -28,23 +28,56 @@
   </div>
 
 <script>
-function submitForm() {
-    const payload = {
-        firstName: document.getElementById("firstName").value,
-        lastName: document.getElementById("lastName").value,
-        company: document.getElementById("company").value,
-        email: document.getElementById("email").value
-    };
+function getConfigFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const config = {};
 
-    fetch("/.netlify/functions/send-quote-lead", {
-        method: "POST",
-        body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(() => {
-        window.location.href = "quote-handoff.html";
-    })
-    .catch(err => console.error(err));
+  params.forEach((value, key) => {
+    config[key] = value;
+  });
+
+  return config;
+}
+
+async function submitForm() {
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const companyName = document.getElementById("company").value.trim();
+  const leadEmail = document.getElementById("email").value.trim();
+
+  const leadName = `${firstName} ${lastName}`.trim();
+  const config = getConfigFromUrl();
+
+  const payload = {
+    leadName,
+    leadEmail,
+    companyName,
+    sourceUrl: window.location.href,
+    config
+  };
+
+  try {
+    const res = await fetch("/.netlify/functions/send-quote-lead", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      console.error("Quote request failed:", data);
+      alert("There was a problem sending your request. Please try again.");
+      return;
+    }
+
+    window.location.href = "quote-handoff.html";
+  } catch (err) {
+    console.error("Network or server error:", err);
+    alert("There was a problem sending your request. Please try again.");
+  }
 }
 </script>
 

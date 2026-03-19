@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vectary Overlay Quote Prototype</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #e8edf3, #f7f9fb);
+      color: #222;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 1.6fr 420px;
+      min-height: 100vh;
+      gap: 20px;
+      padding: 20px;
+    }
+    .viewer-wrap,
+    .panel {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+    .viewer-header,
+    .panel-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid #e8e8e8;
+      background: #fafafa;
+    }
+    .viewer-header h2,
+    .panel-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .viewer-body {
+      position: relative;
+      height: calc(100vh - 94px);
+      min-height: 620px;
+      background: #ddd;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+    .viewer-note {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      background: rgba(255,255,255,0.92);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      max-width: 360px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .panel {
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-body {
+      padding: 18px;
+      display: grid;
+      gap: 18px;
+    }
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+    label {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    select,
+    input,
+    textarea,
+    button {
+      font: inherit;
+    }
+    select,
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d9d9d9;
+      border-radius: 10px;
+      background: #fff;
+    }
+    .swatches {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .swatch {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .swatch:hover { transform: translateY(-1px); }
+    .swatch.active { border-color: #111; }
+    .summary {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 12px;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+    }
+    .summary-row strong {
+      font-size: 18px;
+    }
+    .actions {
+      display: grid;
+      gap: 10px;
+    }
+    .primary {
+      background: #111;
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .primary:hover { opacity: 0.94; }
+    .secondary {
+      background: #fff;
+      color: #111;
+      border: 1px solid #d9d9d9;
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+    }
+    .status {
+      font-size: 13px;
+      min-height: 18px;
+    }
+    .muted { color: #666; }
+    .tiny {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.45;
+    }
+    @media (max-width: 960px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+      .viewer-body {
+        height: 60vh;
+        min-height: 420px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="viewer-wrap">
+      <div class="viewer-header">
+        <h2>3D configurator</h2>
+      </div>
+      <div class="viewer-body">
+        <!-- Replace the src below with your Vectary embed URL -->
+        <iframe
+          id="vectaryFrame"
+          src="https://www.vectary.com/viewer/v1/?model=YOUR_MODEL_ID_HERE"
+          allow="fullscreen; xr-spatial-tracking"
+          allowfullscreen
+        ></iframe>
+        <div class="viewer-note">
+          The 3D stays interactive. This panel is separate from the pricing/request logic.
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-header">
+        <h2>Build your request</h2>
+      </div>
+
+      <div class="panel-body">
+        <div class="field">
+          <label for="product">Product</label>
+          <select id="product">
+            <option value="Sphere">Sphere</option>
+            <option value="Sphere 1">Sphere 1</option>
+            <option value="Sphere 2" selected>Sphere 2</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Finish</label>
+          <div class="swatches" id="swatches">
+            <button type="button" class="swatch" data-colour="Green" style="background:#4b8b48" aria-label="Green"></button>
+            <button type="button" class="swatch" data-colour="Blue" style="background:#4e5fb4" aria-label="Blue"></button>
+            <button type="button" class="swatch active" data-colour="Red" style="background:#c1334c" aria-label="Red"></button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="quantity">Quantity</label>
+          <input id="quantity" type="number" min="1" step="1" value="10" />
+        </div>
+
+        <div class="summary">
+          <div class="summary-row"><span>Product</span><span id="summaryProduct">Sphere 2</span></div>
+          <div class="summary-row"><span>Finish</span><span id="summaryColour">Red</span></div>
+          <div class="summary-row"><span>Unit price</span><span id="summaryUnitPrice">77</span></div>
+          <div class="summary-row"><span>Quantity</span><span id="summaryQty">10</span></div>
+          <div class="summary-row"><span><strong>Total</strong></span><span><strong id="summaryTotal">770</strong></span></div>
+        </div>
+
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" type="text" placeholder="Sammy Stotte" />
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="sammy@stotte.com" />
+        </div>
+
+        <div class="field">
+          <label for="company">Company</label>
+          <input id="company" type="text" placeholder="Stotte Ltd" />
+        </div>
+
+        <div class="field">
+          <label for="notes">Notes</label>
+          <textarea id="notes" rows="4" placeholder="Anything else we should know?"></textarea>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="sendBtn">Send request</button>
+          <button class="secondary" id="previewBtn" type="button">Preview payload in console</button>
+          <div class="status muted" id="status"></div>
+        </div>
+
+        <div class="tiny">
+          This version keeps pricing and quantity outside Vectary, so the payload is reliable even if Append Parameters changes again.
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const state = {
+      product: 'Sphere 2',
+      colour: 'Red',
+      quantity: 10,
+      name: '',
+      email: '',
+      company: '',
+      notes: ''
+    };
+
+    // Replace with your real pricing logic later.
+    // This can become JSON, a Google Sheet feed, or a Netlify-loaded price table.
+    const priceMap = {
+      'Sphere': { Green: 59, Blue: 62, Red: 64 },
+      'Sphere 1': { Green: 68, Blue: 71, Red: 73 },
+      'Sphere 2': { Green: 75, Blue: 76, Red: 77 }
+    };
+
+    const productEl = document.getElementById('product');
+    const quantityEl = document.getElementById('quantity');
+    const swatchEls = Array.from(document.querySelectorAll('.swatch'));
+    const statusEl = document.getElementById('status');
+
+    const summaryProduct = document.getElementById('summaryProduct');
+    const summaryColour = document.getElementById('summaryColour');
+    const summaryUnitPrice = document.getElementById('summaryUnitPrice');
+    const summaryQty = document.getElementById('summaryQty');
+    const summaryTotal = document.getElementById('summaryTotal');
+
+    const leadFields = ['name', 'email', 'company', 'notes'];
+
+    function getUnitPrice(product, colour) {
+      return priceMap?.[product]?.[colour] ?? 0;
+    }
+
+    function calculateTotal() {
+      return getUnitPrice(state.product, state.colour) * state.quantity;
+    }
+
+    function renderSummary() {
+      summaryProduct.textContent = state.product;
+      summaryColour.textContent = state.colour;
+      summaryUnitPrice.textContent = getUnitPrice(state.product, state.colour);
+      summaryQty.textContent = state.quantity;
+      summaryTotal.textContent = calculateTotal();
+    }
+
+    function getPayload() {
+      return {
+        product: state.product,
+        finish: state.colour,
+        quantity: state.quantity,
+        unit_price: getUnitPrice(state.product, state.colour),
+        total_price: calculateTotal(),
+        lead: {
+          name: state.name,
+          email: state.email,
+          company: state.company,
+          notes: state.notes
+        },
+        source: 'vectary-overlay-prototype',
+        submitted_at: new Date().toISOString()
+      };
+    }
+
+    function syncLeadFields() {
+      leadFields.forEach((field) => {
+        const el = document.getElementById(field);
+        state[field] = el.value.trim();
+      });
+    }
+
+    productEl.addEventListener('change', () => {
+      state.product = productEl.value;
+      renderSummary();
+    });
+
+    quantityEl.addEventListener('input', () => {
+      const next = parseInt(quantityEl.value, 10);
+      state.quantity = Number.isFinite(next) && next > 0 ? next : 1;
+      if (!quantityEl.value || Number(quantityEl.value) < 1) quantityEl.value = state.quantity;
+      renderSummary();
+    });
+
+    swatchEls.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        swatchEls.forEach((el) => el.classList.remove('active'));
+        btn.classList.add('active');
+        state.colour = btn.dataset.colour;
+        renderSummary();
+      });
+    });
+
+    leadFields.forEach((field) => {
+      document.getElementById(field).addEventListener('input', syncLeadFields);
+    });
+
+    document.getElementById('previewBtn').addEventListener('click', () => {
+      syncLeadFields();
+      const payload = getPayload();
+      console.log('Quote payload:', payload);
+      statusEl.textContent = 'Payload written to console.';
+    });
+
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+      syncLeadFields();
+
+      if (!state.name || !state.email) {
+        statusEl.textContent = 'Please add at least a name and email.';
+        return;
+      }
+
+      const payload = getPayload();
+      statusEl.textContent = 'Sending...';
+
+      try {
+        // Replace with your real Netlify function endpoint.
+        const response = await fetch('/.netlify/functions/send-quote-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        statusEl.textContent = 'Request sent.';
+        console.log('Sent payload:', payload);
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = 'Send failed. Check endpoint and console.';
+      }
+    });
+
+    renderSummary();
+  </script>
+</body>
+</html>

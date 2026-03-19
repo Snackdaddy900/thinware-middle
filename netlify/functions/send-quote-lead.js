@@ -66,7 +66,7 @@ exports.handler = async (event) => {
   try {
     const resend = new Resend(resendApiKey);
 
-    const result = await resend.emails.send({
+    const resendResponse = await resend.emails.send({
       from: fromEmail,
       to: [toEmail],
       reply_to: leadEmail,
@@ -93,8 +93,8 @@ exports.handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         ok: true,
-        message: "Email sent",
-        id: result?.data?.id || null
+        message: "Email send attempted",
+        resendResponse
       })
     };
   } catch (err) {

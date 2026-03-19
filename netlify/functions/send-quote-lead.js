@@ -44,17 +44,21 @@ exports.handler = async (event) => {
     };
   }
 
-  // Use the variables you already have set in Netlify
   const resendApiKey = process.env.resend_api_key;
-  const adminEmail = process.env.resend_admin_email;
+  const toEmail = process.env.resend_admin_email;
+  const fromEmail = process.env.resend_from_email || process.env.resend_admin_email;
 
-  if (!resendApiKey || !adminEmail) {
+  if (!resendApiKey || !toEmail || !fromEmail) {
     return {
       statusCode: 500,
       body: JSON.stringify({
         ok: false,
-        error: "Missing existing Resend environment variables",
-        expected: ["resend_api_key", "resend_admin_email"]
+        error: "Missing Resend environment variables",
+        expected: [
+          "resend_api_key",
+          "resend_admin_email",
+          "resend_from_email"
+        ]
       })
     };
   }
@@ -62,33 +66,27 @@ exports.handler = async (event) => {
   try {
     const resend = new Resend(resendApiKey);
 
-    const subject = `Quote request from ${leadName}`;
-
-    const html = `
-      <h2>New Quote Request</h2>
-      <p><strong>Name:</strong> ${leadName}</p>
-      <p><strong>Email:</strong> ${leadEmail}</p>
-      <p><strong>Product:</strong> ${product}</p>
-      <p><strong>Colour:</strong> ${color}</p>
-      <p><strong>Quantity:</strong> ${quantity}</p>
-    `;
-
-    const text = [
-      "New Quote Request",
-      `Name: ${leadName}`,
-      `Email: ${leadEmail}`,
-      `Product: ${product}`,
-      `Colour: ${color}`,
-      `Quantity: ${quantity}`
-    ].join("\n");
-
     const result = await resend.emails.send({
-      from: adminEmail,
-      to: [adminEmail],
+      from: fromEmail,
+      to: [toEmail],
       reply_to: leadEmail,
-      subject,
-      html,
-      text
+      subject: `Quote request from ${leadName}`,
+      html: `
+        <h2>New Quote Request</h2>
+        <p><strong>Name:</strong> ${leadName}</p>
+        <p><strong>Email:</strong> ${leadEmail}</p>
+        <p><strong>Product:</strong> ${product}</p>
+        <p><strong>Colour:</strong> ${color}</p>
+        <p><strong>Quantity:</strong> ${quantity}</p>
+      `,
+      text: [
+        "New Quote Request",
+        `Name: ${leadName}`,
+        `Email: ${leadEmail}`,
+        `Product: ${product}`,
+        `Colour: ${color}`,
+        `Quantity: ${quantity}`
+      ].join("\n")
     });
 
     return {

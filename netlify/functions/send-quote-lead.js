@@ -44,11 +44,12 @@ exports.handler = async (event) => {
     };
   }
 
+  // ✅ FORCE RESEND TEST EMAIL (no domain verification needed)
   const resendApiKey = process.env.resend_api_key;
   const toEmail = process.env.resend_admin_email;
-  const fromEmail = process.env.resend_from_email || process.env.resend_admin_email;
+  const fromEmail = "onboarding@resend.dev";
 
-  if (!resendApiKey || !toEmail || !fromEmail) {
+  if (!resendApiKey || !toEmail) {
     return {
       statusCode: 500,
       body: JSON.stringify({
@@ -56,8 +57,7 @@ exports.handler = async (event) => {
         error: "Missing Resend environment variables",
         expected: [
           "resend_api_key",
-          "resend_admin_email",
-          "resend_from_email"
+          "resend_admin_email"
         ]
       })
     };

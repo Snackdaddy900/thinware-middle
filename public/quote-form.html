@@ -27,59 +27,67 @@
     <button class="modal-button" onclick="submitForm()">Send</button>
   </div>
 
-<script>
-function getConfigFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const config = {};
+  <script>
+    function getConfigFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const config = {};
 
-  params.forEach((value, key) => {
-    config[key] = value;
-  });
+      params.forEach((value, key) => {
+        config[key] = value;
+      });
 
-  return config;
-}
-
-async function submitForm() {
-  const firstName = document.getElementById("firstName").value.trim();
-  const lastName = document.getElementById("lastName").value.trim();
-  const companyName = document.getElementById("company").value.trim();
-  const leadEmail = document.getElementById("email").value.trim();
-
-  const leadName = `${firstName} ${lastName}`.trim();
-  const config = getConfigFromUrl();
-
-  const payload = {
-    leadName,
-    leadEmail,
-    companyName,
-    sourceUrl: window.location.href,
-    config
-  };
-
-  try {
-    const res = await fetch("/.netlify/functions/send-quote-lead", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.ok) {
-      console.error("Quote request failed:", data);
-      alert("There was a problem sending your request. Please try again.");
-      return;
+      return config;
     }
 
-    window.location.href = "quote-handoff.html";
-  } catch (err) {
-    console.error("Network or server error:", err);
-    alert("There was a problem sending your request. Please try again.");
-  }
-}
-</script>
+    async function submitForm() {
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();
+      const companyName = document.getElementById("company").value.trim();
+      const leadEmail = document.getElementById("email").value.trim();
+
+      const leadName = `${firstName} ${lastName}`.trim();
+      const config = getConfigFromUrl();
+
+      const product = config.product || "";
+      const colour = config.colour || "";
+      const quantity = config.quantity || "";
+      const totalPrice = config.totalPrice || "";
+
+      const payload = {
+        leadName,
+        leadEmail,
+        companyName,
+        sourceUrl: window.location.href,
+        product,
+        colour,
+        quantity,
+        totalPrice
+      };
+
+      try {
+        const res = await fetch("/.netlify/functions/send-quote-lead", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          console.error("Quote request failed:", data);
+          alert("There was a problem sending your request. Please try again.");
+          return;
+        }
+
+        window.location.href = "quote-handoff.html";
+      } catch (err) {
+        console.error("Network or server error:", err);
+        alert("There was a problem sending your request. Please try again.");
+      }
+    }
+  </script>
 
 </body>
 </html>

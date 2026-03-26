@@ -2,92 +2,113 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Quote</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 40px;
-      max-width: 500px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 12px;
-      font-size: 16px;
-    }
-    button {
-      cursor: pointer;
-    }
-    pre {
-      background: #f4f4f4;
-      padding: 12px;
-      white-space: pre-wrap;
-    }
-  </style>
+  <title>Quote Pricing</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<h1>Quote</h1>
+  <iframe
+    class="fullscreen-iframe"
+    src="https://app.vectary.com/p/2FJYYQ9lO2dXHFwpk31gUe"
+    allow="xr-spatial-tracking; fullscreen;">
+  </iframe>
 
-<select id="product">
-  <option>Sphere 1</option>
-  <option>Sphere 2</option>
-</select>
+  <div id="modal-pricing" class="frosted-modal" style="display:block;">
+    <h1 class="modal-title">Build your quote</h1>
 
-<select id="color">
-  <option>Green</option>
-  <option>Red</option>
-</select>
+    <select id="product" class="modal-input"></select>
+    <select id="colour" class="modal-input"></select>
 
-<input id="quantity" type="number" placeholder="Quantity" value="10" />
+    <input
+      id="quantity"
+      class="modal-input"
+      type="number"
+      min="1"
+      value="1"
+      placeholder="Quantity"
+    />
 
-<input id="name" type="text" placeholder="Name" />
-<input id="email" type="email" placeholder="Email" />
+    <input
+      id="totalPrice"
+      class="modal-input"
+      type="text"
+      value="$0"
+      readonly
+    />
 
-<button onclick="handleSend()">Send</button>
+    <button class="modal-button" onclick="goToContact()">Get quote</button>
+  </div>
 
-<pre id="responseBox"></pre>
+  <script>
+    const pricingConfig = {
+      product: [
+        { label: "Sphere 1", value: "sphere1", price: 100 },
+        { label: "Cube 1", value: "cube1", price: 120 }
+      ],
+      colour: [
+        { label: "Green", value: "green", price: 10 },
+        { label: "Red", value: "red", price: 15 }
+      ]
+    };
 
-<script>
-async function handleSend() {
-  const payload = {
-    lead: {
-      name: document.getElementById("name").value,
-      email: document.getElementById("email").value
-    },
-    product: document.getElementById("product").value,
-    color: document.getElementById("color").value,
-    quantity: document.getElementById("quantity").value
-  };
+    function populateSelect(selectId, options) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = "";
 
-  console.log("Sending payload:", payload);
-
-  try {
-    const res = await fetch("/.netlify/functions/send-quote-lead", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const text = await res.text();
-
-    try {
-      const data = JSON.parse(text);
-      document.getElementById("responseBox").textContent =
-        JSON.stringify(data, null, 2);
-    } catch (e) {
-      document.getElementById("responseBox").textContent =
-        "Not JSON response:\n" + text;
+      options.forEach(option => {
+        const el = document.createElement("option");
+        el.value = option.value;
+        el.textContent = option.label;
+        select.appendChild(el);
+      });
     }
 
-  } catch (err) {
-    document.getElementById("responseBox").textContent =
-      "Request failed: " + err.message;
-  }
-}
-</script>
+    function getSelectedOption(groupName, value) {
+      return pricingConfig[groupName].find(item => item.value === value);
+    }
+
+    function updateTotal() {
+      const productValue = document.getElementById("product").value;
+      const colourValue = document.getElementById("colour").value;
+      const quantity = parseInt(document.getElementById("quantity").value, 10) || 1;
+
+      const product = getSelectedOption("product", productValue);
+      const colour = getSelectedOption("colour", colourValue);
+
+      const unitPrice = (product?.price || 0) + (colour?.price || 0);
+      const total = unitPrice * quantity;
+
+      document.getElementById("totalPrice").value = `$${total}`;
+    }
+
+    function goToContact() {
+      const productValue = document.getElementById("product").value;
+      const colourValue = document.getElementById("colour").value;
+      const quantity = parseInt(document.getElementById("quantity").value, 10) || 1;
+      const total = document.getElementById("totalPrice").value.replace("$", "");
+
+      const product = getSelectedOption("product", productValue);
+      const colour = getSelectedOption("colour", colourValue);
+
+      const params = new URLSearchParams({
+        product: product?.label || "",
+        colour: colour?.label || "",
+        quantity: quantity,
+        totalPrice: total
+      });
+
+      window.location.href = `quote-contact.html?${params.toString()}`;
+    }
+
+    populateSelect("product", pricingConfig.product);
+    populateSelect("colour", pricingConfig.colour);
+
+    document.getElementById("product").addEventListener("change", updateTotal);
+    document.getElementById("colour").addEventListener("change", updateTotal);
+    document.getElementById("quantity").addEventListener("input", updateTotal);
+
+    updateTotal();
+  </script>
 
 </body>
 </html>

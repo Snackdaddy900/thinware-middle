@@ -12,7 +12,6 @@ body {
   height: 100%;
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: #ffffff;
-  color: #ffffff;
 }
 
 /* === FULLSCREEN IFRAME === */
@@ -23,45 +22,48 @@ body {
   display: block;
 }
 
-/* === FROSTED MODAL — dark Vectary-style glass === */
+/* === MODAL — CLEAN LIGHT GLASS (FINAL) === */
 .frosted-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-
+  
   width: 420px;
   max-width: 90%;
 
   padding: 22px;
   border-radius: 18px;
 
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* KEY BALANCE: mostly solid, slight glass */
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  /* subtle definition */
+  border: 1px solid rgba(255, 255, 255, 0.7);
+
+  /* soft float */
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
 
   color: #222;
   display: none;
 }
 
-/* === BODY TEXT INSIDE MODAL === */
+/* === BODY TEXT === */
 .frosted-modal p {
   margin: 0 0 12px;
   font-size: 12px;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.72);
+  color: #555;
 }
 
-/* === HEADING === */
+/* === TITLE === */
 .modal-title {
   font-size: 17px;
   font-weight: 600;
-  line-height: 1.35;
   margin: 0 0 14px;
-  color: #ffffff;
+  color: #111;
 }
 
 /* === INPUT FIELDS === */
@@ -71,26 +73,22 @@ body {
   margin-bottom: 10px;
 
   font-size: 13px;
-  line-height: 1.35;
 
-  background: rgba(30, 30, 30, 0.12);
+  background: #ffffff;
   color: #222;
 
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
 
-  box-shadow: none;
+  outline: none;
 }
 
 .modal-input::placeholder {
-  color: rgba(255, 255, 255, 0.58);
+  color: #777;
 }
 
-.modal-input:focus,
-.modal-input:focus-visible {
-  outline: none;
-  border-color: rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, 0.16);
+.modal-input:focus {
+  border-color: rgba(0, 0, 0, 0.25);
 }
 
 /* === BUTTON === */
@@ -102,16 +100,14 @@ body {
   font-size: 13px;
   font-weight: 500;
 
-  background: rgba(255, 255, 255, 0.92);
-  color: #111111;
+  background: #f7f7f7;
+  color: #111;
 
   border-radius: 8px;
-  border: none;
+  border: 1px solid rgba(0,0,0,0.06);
 
-  box-shadow: none;
   cursor: pointer;
-
-  transition: background 0.12s ease-out, transform 0.12s ease-out;
+  transition: background 0.12s ease-out, transform 0.1s ease-out;
 }
 
 .modal-button:hover {
@@ -122,11 +118,9 @@ body {
   transform: translateY(1px);
 }
 
-/* === SMALL SCREENS === */
+/* === MOBILE === */
 @media (max-width: 480px) {
   .frosted-modal {
-    width: calc(100% - 24px);
-    max-width: none;
     padding: 18px 14px;
     border-radius: 16px;
   }
@@ -137,11 +131,9 @@ body {
 
   .modal-button {
     font-size: 12.5px;
-    padding: 9px 0;
   }
 
   .modal-input {
     font-size: 12.5px;
-    padding: 9px 10px;
   }
 }

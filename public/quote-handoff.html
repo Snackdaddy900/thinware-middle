@@ -2,301 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quote Request Received</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.5;
-      margin: 0;
-      padding: 0;
-      background: #f7f7f7;
-      color: #222;
-    }
-
-    .wrap {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 24px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    }
-
-    h1 {
-      margin-top: 0;
-      font-size: 28px;
-    }
-
-    .status {
-      padding: 14px 16px;
-      border-radius: 8px;
-      margin-bottom: 24px;
-      font-weight: bold;
-    }
-
-    .status.success {
-      background: #eef8ee;
-      color: #1f6b2d;
-      border: 1px solid #cce7cf;
-    }
-
-    .status.error {
-      background: #fff2f2;
-      color: #9b1c1c;
-      border: 1px solid #f0caca;
-    }
-
-    .section {
-      margin-bottom: 28px;
-    }
-
-    .section h2 {
-      font-size: 20px;
-      margin-bottom: 12px;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 6px;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 10px 16px;
-    }
-
-    .label {
-      font-weight: bold;
-      color: #555;
-    }
-
-    .price-box {
-      margin: 20px 0;
-      padding: 18px;
-      background: #f3f6fb;
-      border: 1px solid #d9e3f0;
-      border-radius: 10px;
-    }
-
-    .price-box .price-label {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 6px;
-    }
-
-    .price-box .price-value {
-      font-size: 32px;
-      font-weight: bold;
-    }
-
-    .disclaimer {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #555;
-    }
-
-    .button-row {
-      margin-top: 30px;
-    }
-
-    .button {
-      display: inline-block;
-      padding: 12px 18px;
-      border-radius: 8px;
-      text-decoration: none;
-      background: #222;
-      color: #fff;
-      font-weight: bold;
-    }
-
-    .muted {
-      color: #666;
-      font-size: 14px;
-    }
-
-    @media (max-width: 640px) {
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  <title>Quote Form</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <div class="wrap">
-    <div id="statusMessage" class="status success">
-      Your quote request has been sent.
-    </div>
 
-    <h1>Quote Request Received</h1>
-    <p class="muted">
-      Thank you. We’ve received your request and will confirm the details with a formal quote.
-    </p>
+  <!-- Fullscreen iframe (same scene, keeps consistency) -->
+  <iframe 
+    class="fullscreen-iframe"
+    src="https://app.vectary.com/p/2FJYYQ9lO2dXHFwpk31gUe"
+    allow="xr-spatial-tracking; fullscreen;">
+  </iframe>
 
-    <div class="price-box" id="priceBox" style="display:none;">
-      <div class="price-label">Estimated Price</div>
-      <div class="price-value" id="priceValue"></div>
-      <div class="disclaimer">
-        This estimate reflects your selected configuration. Final pricing and availability will be confirmed with a formal quote.
-      </div>
-    </div>
+  <!-- Modal — Contact details -->
+  <div id="modal-form" class="frosted-modal" style="display:block;">
+    <h1 class="modal-title">Tell us who to send the quote to</h1>
 
-    <div class="section">
-      <h2>Configuration Summary</h2>
-      <div id="configSummary" class="summary-grid"></div>
-    </div>
+    <input id="firstName" class="modal-input" placeholder="First Name" />
+    <input id="lastName" class="modal-input" placeholder="Surname" />
+    <input id="company" class="modal-input" placeholder="Company Name (optional)" />
+    <input id="email" class="modal-input" placeholder="Email Address" type="email" />
 
-    <div class="section">
-      <h2>Customer Details</h2>
-      <div id="customerSummary" class="summary-grid"></div>
-    </div>
-
-    <div class="section">
-      <h2>What Happens Next</h2>
-      <p>
-        Our team will review your selected configuration, confirm availability, and follow up with a formal quote.
-      </p>
-    </div>
-
-    <div class="button-row">
-      <a class="button" href="quote.html">Back to Configurator</a>
-    </div>
+    <button class="modal-button" onclick="submitForm()">Send</button>
   </div>
 
   <script>
-    /**
-     * Assumption:
-     * Data arrives either:
-     * 1. via query string
-     * 2. via sessionStorage from quote-form.html
-     *
-     * This page will try sessionStorage first, then fall back to URL params.
-     */
-
-    function getStoredData() {
-      try {
-        const raw = sessionStorage.getItem("quotePayload");
-        return raw ? JSON.parse(raw) : null;
-      } catch (err) {
-        console.error("Could not parse sessionStorage quotePayload:", err);
-        return null;
-      }
-    }
-
-    function getQueryParams() {
+    function getConfigFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const data = {};
-      for (const [key, value] of params.entries()) {
-        data[key] = value;
-      }
-      return data;
-    }
+      const config = {};
 
-    function addRow(container, label, value) {
-      if (!value || String(value).trim() === "") return;
-
-      const labelEl = document.createElement("div");
-      labelEl.className = "label";
-      labelEl.textContent = label;
-
-      const valueEl = document.createElement("div");
-      valueEl.textContent = value;
-
-      container.appendChild(labelEl);
-      container.appendChild(valueEl);
-    }
-
-    function humanizeKey(key) {
-      return key
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, char => char.toUpperCase());
-    }
-
-    function renderPage(data) {
-      const statusMessage = document.getElementById("statusMessage");
-      const configSummary = document.getElementById("configSummary");
-      const customerSummary = document.getElementById("customerSummary");
-      const priceBox = document.getElementById("priceBox");
-      const priceValue = document.getElementById("priceValue");
-
-      // Optional status flag
-      const status = data.status || "success";
-      if (status !== "success") {
-        statusMessage.className = "status error";
-        statusMessage.textContent = "There was a problem sending your quote request.";
-      }
-
-      // Price field: update these candidate names as needed
-      const price =
-        data.Total_Price ||
-        data.total_price ||
-        data.price ||
-        data.estimated_price ||
-        "";
-
-      if (price) {
-        priceValue.textContent = price;
-        priceBox.style.display = "block";
-      }
-
-      // Customer fields you want grouped separately
-      const customerFields = [
-        "name",
-        "full_name",
-        "company",
-        "email",
-        "phone",
-        "notes",
-        "message"
-      ];
-
-      // Internal / noisy fields to exclude
-      const excludedFields = [
-        "status",
-        "submit",
-        "form_submitted"
-      ];
-
-      // Render customer details
-      customerFields.forEach(field => {
-        if (data[field]) {
-          addRow(customerSummary, humanizeKey(field), data[field]);
-        }
+      params.forEach((value, key) => {
+        config[key] = value;
       });
 
-      // Render config summary
-      Object.keys(data).forEach(key => {
-        if (
-          customerFields.includes(key) ||
-          excludedFields.includes(key)
-        ) {
-          return;
-        }
-
-        // Skip empty values
-        if (!data[key] || String(data[key]).trim() === "") {
-          return;
-        }
-
-        addRow(configSummary, humanizeKey(key), data[key]);
-      });
-
-      // Fallback if nothing came through
-      if (!Object.keys(data).length) {
-        statusMessage.className = "status error";
-        statusMessage.textContent = "No quote data was found.";
-        configSummary.innerHTML = "<div>No configuration data available.</div>";
-        customerSummary.innerHTML = "<div>No customer details available.</div>";
-      }
+      return config;
     }
 
-    const storedData = getStoredData();
-    const queryData = getQueryParams();
+    function submitForm() {
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();
+      const company = document.getElementById("company").value.trim();
+      const email = document.getElementById("email").value.trim();
 
-    // Prefer sessionStorage if available, otherwise query params
-    const finalData = storedData && Object.keys(storedData).length
-      ? storedData
-      : queryData;
+      if (!firstName || !lastName || !email) {
+        alert("Please complete first name, surname, and email address.");
+        return;
+      }
 
-    renderPage(finalData);
+      const name = `${firstName} ${lastName}`.trim();
+      const config = getConfigFromUrl();
+
+      const payload = {
+        name,
+        email,
+        company,
+        sourceUrl: window.location.href,
+        ...config,
+        status: "success"
+      };
+
+      console.log("Storing payload for quote handoff:", payload);
+
+      sessionStorage.setItem("quotePayload", JSON.stringify(payload));
+      window.location.href = "quote-handoff.html";
+    }
   </script>
+
 </body>
 </html>

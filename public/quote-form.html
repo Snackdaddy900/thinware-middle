@@ -39,53 +39,33 @@
       return config;
     }
 
-    async function submitForm() {
+    function submitForm() {
       const firstName = document.getElementById("firstName").value.trim();
       const lastName = document.getElementById("lastName").value.trim();
-      const companyName = document.getElementById("company").value.trim();
-      const leadEmail = document.getElementById("email").value.trim();
+      const company = document.getElementById("company").value.trim();
+      const email = document.getElementById("email").value.trim();
 
-      const leadName = `${firstName} ${lastName}`.trim();
+      if (!firstName || !lastName || !email) {
+        alert("Please complete first name, surname, and email address.");
+        return;
+      }
+
+      const name = `${firstName} ${lastName}`.trim();
       const config = getConfigFromUrl();
 
-      const product = config.product || "";
-      const colour = config.colour || "";
-      const quantity = config.quantity || "";
-      const totalPrice = config.totalPrice || "";
-
       const payload = {
-        leadName,
-        leadEmail,
-        companyName,
+        name,
+        email,
+        company,
         sourceUrl: window.location.href,
-        product,
-        colour,
-        quantity,
-        totalPrice
+        ...config,
+        status: "success"
       };
 
-      try {
-        const res = await fetch("/.netlify/functions/send-quote-lead", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
+      console.log("Storing payload for quote handoff:", payload);
 
-        const data = await res.json();
-
-        if (!res.ok || !data.ok) {
-          console.error("Quote request failed:", data);
-          alert("There was a problem sending your request. Please try again.");
-          return;
-        }
-
-        window.location.href = "quote-handoff.html";
-      } catch (err) {
-        console.error("Network or server error:", err);
-        alert("There was a problem sending your request. Please try again.");
-      }
+      sessionStorage.setItem("quotePayload", JSON.stringify(payload));
+      window.location.href = "quote-handoff.html";
     }
   </script>
 

@@ -24,11 +24,14 @@ exports.handler = async (event) => {
     };
   }
 
-  const leadName = payload?.lead?.name?.trim();
-  const leadEmail = payload?.lead?.email?.trim();
+  // Accept flat payload from quote-handoff.html
+  const leadName = (payload?.name || "").trim();
+  const leadEmail = (payload?.email || "").trim();
+  const company = payload?.company || "";
   const product = payload?.product || "";
-  const color = payload?.color || payload?.finish || "";
+  const colour = payload?.colour || payload?.color || payload?.finish || "";
   const quantity = payload?.quantity || "";
+  const totalPrice = payload?.totalPrice || payload?.total_price || "";
 
   if (!leadName || !leadEmail) {
     return {
@@ -37,14 +40,14 @@ exports.handler = async (event) => {
         ok: false,
         error: "Missing required fields",
         missing: [
-          !leadName ? "lead.name" : null,
-          !leadEmail ? "lead.email" : null
-        ].filter(Boolean)
+          !leadName ? "name" : null,
+          !leadEmail ? "email" : null
+        ].filter(Boolean),
+        receivedPayloadKeys: Object.keys(payload)
       })
     };
   }
 
-  // ✅ FORCE RESEND TEST EMAIL (no domain verification needed)
   const resendApiKey = process.env.resend_api_key;
   const toEmail = process.env.resend_admin_email;
   const fromEmail = "onboarding@resend.dev";
@@ -75,17 +78,21 @@ exports.handler = async (event) => {
         <h2>New Quote Request</h2>
         <p><strong>Name:</strong> ${leadName}</p>
         <p><strong>Email:</strong> ${leadEmail}</p>
+        <p><strong>Company:</strong> ${company}</p>
         <p><strong>Product:</strong> ${product}</p>
-        <p><strong>Colour:</strong> ${color}</p>
+        <p><strong>Colour:</strong> ${colour}</p>
         <p><strong>Quantity:</strong> ${quantity}</p>
+        <p><strong>Estimated Price:</strong> ${totalPrice}</p>
       `,
       text: [
         "New Quote Request",
         `Name: ${leadName}`,
         `Email: ${leadEmail}`,
+        `Company: ${company}`,
         `Product: ${product}`,
-        `Colour: ${color}`,
-        `Quantity: ${quantity}`
+        `Colour: ${colour}`,
+        `Quantity: ${quantity}`,
+        `Estimated Price: ${totalPrice}`
       ].join("\n")
     });
 
@@ -93,7 +100,7 @@ exports.handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         ok: true,
-        message: "Email send attempted",
+        message: "Email sent successfully",
         resendResponse
       })
     };
